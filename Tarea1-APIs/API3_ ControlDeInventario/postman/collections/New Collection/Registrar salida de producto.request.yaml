@@ -1,0 +1,7 @@
+$kind: http-request
+url: http://localhost:3000/inventario/1/salida
+method: POST
+body:
+  type: json
+  content: "{\r\n    \"cantidad\":18\r\n}"
+order: 3694429916753680

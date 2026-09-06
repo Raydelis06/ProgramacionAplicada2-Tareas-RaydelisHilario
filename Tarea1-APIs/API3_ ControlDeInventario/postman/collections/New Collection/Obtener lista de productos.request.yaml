@@ -1,0 +1,4 @@
+$kind: http-request
+url: http://localhost:3000/inventario
+method: GET
+order: 1788534059612

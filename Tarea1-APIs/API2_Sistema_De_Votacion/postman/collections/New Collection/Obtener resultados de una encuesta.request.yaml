@@ -1,0 +1,4 @@
+$kind: http-request
+url: http://localhost:3000/encuestas/1/resultados
+method: GET
+order: 3160397530740544

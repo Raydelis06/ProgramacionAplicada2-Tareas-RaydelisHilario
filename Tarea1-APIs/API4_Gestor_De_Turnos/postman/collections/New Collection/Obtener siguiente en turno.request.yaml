@@ -1,0 +1,4 @@
+$kind: http-request
+url: http://localhost:3000/turnos/siguiente
+method: GET
+order: 3613810041028649

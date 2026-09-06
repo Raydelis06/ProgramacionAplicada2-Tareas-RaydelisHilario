@@ -1,0 +1,7 @@
+$kind: http-request
+url: http://localhost:3000/encuestas/1/votar
+method: POST
+body:
+  type: json
+  content: "{\r\n    \"opcion\": \"Volar\"\r\n}"
+order: 2948664139661233

@@ -1,0 +1,4 @@
+$kind: http-request
+url: http://localhost:3000/turnos
+method: GET
+order: 1788548200677

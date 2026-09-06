@@ -1,0 +1,4 @@
+$kind: http-request
+url: http://localhost:3000/productos/3
+method: DELETE
+order: 2303836724495476

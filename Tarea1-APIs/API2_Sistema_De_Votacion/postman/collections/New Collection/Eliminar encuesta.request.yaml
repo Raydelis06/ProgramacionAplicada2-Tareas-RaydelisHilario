@@ -1,0 +1,4 @@
+$kind: http-request
+url: http://localhost:3000/encuestas/3
+method: DELETE
+order: 3450954894059925

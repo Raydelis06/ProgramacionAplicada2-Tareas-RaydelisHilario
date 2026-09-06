@@ -1,0 +1,13 @@
+$kind: http-request
+url: http://localhost:3000/turnos
+method: POST
+body:
+  type: json
+  content: "{\r
+
+    \    \"cliente\": \"Maria Vera\",\r
+
+    \    \"servicio\": \"Limpieza de cejas\"\r
+
+    }"
+order: 2707346320971140

@@ -1,0 +1,4 @@
+$kind: http-request
+url: http://localhost:3000/inventario/alertas
+method: GET
+order: 4351516001522289

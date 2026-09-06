@@ -1,0 +1,23 @@
+$kind: http-request
+url: http://localhost:3000/encuestas
+method: POST
+body:
+  type: json
+  content: "{\r
+
+    \    \"pregunta\": \"¿Qué tipo de película prefieres?\",\r
+
+    \    \"opciones\": [\r
+
+    \        \"Fantasia\",\r
+
+    \        \"Ciencia ficcion\",\r
+
+    \        \"Drama\",\r
+
+    \        \"Comedia\"\r
+
+    \    ]\r
+
+    }"
+order: 2942047909908553

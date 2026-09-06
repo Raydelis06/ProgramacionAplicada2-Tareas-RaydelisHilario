@@ -1,0 +1,4 @@
+$kind: http-request
+url: http://localhost:3000/turnos/2/finalizar
+method: PUT
+order: 4500470518064390

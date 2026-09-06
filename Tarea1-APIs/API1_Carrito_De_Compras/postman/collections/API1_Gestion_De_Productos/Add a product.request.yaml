@@ -1,0 +1,15 @@
+$kind: http-request
+url: http://localhost:3000/productos
+method: POST
+body:
+  type: json
+  content: "{\r
+
+    \    \"nombre\": \"Lata de leche evaporada\",\r
+
+    \    \"precio\": 100,\r
+
+    \    \"cantidad\": 20\r
+
+    }\r\n"
+order: 1934111917632593

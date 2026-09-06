@@ -1,0 +1,13 @@
+$kind: http-request
+url: http://localhost:3000/inventario
+method: POST
+body:
+  type: json
+  content: "{\r
+
+    \    \"producto\": \"Power Bank\",\r
+
+    \    \"stock\": 30\r
+
+    }"
+order: 489433824907616

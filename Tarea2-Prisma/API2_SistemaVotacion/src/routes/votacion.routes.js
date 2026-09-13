@@ -13,7 +13,7 @@ const router = Router();
 // Definición de rutas asociadas a /encuestas
 router.post("/", validarCampos, crearEncuesta);
 router.get("/", obtenerEncuestas);
-router.post("/:id/votar", validarCampos, votar);
+router.post("/:id/votar", votar);
 router.get("/:id/resultados", obtenerResultadosEncuesta);
 router.delete("/:id", eliminarEncuesta);
 

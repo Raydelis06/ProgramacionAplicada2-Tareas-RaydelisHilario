@@ -1,39 +1,15 @@
 import { prisma } from "../db.js";
 
-const obtenerResultados = async (req, res) => {
+const obtenerResultados = (encuesta) => {
     try {
-        const encuesta = await prisma.encuesta.findUnique({
-            where: {
-                id: Number(req.params.id)
-            },
-            include: {
-                opciones: true
-            }
-        });
 
-        if (!encuesta) {
-            return res.status(404).json({
-                mensaje: "Encuesta no encontrada"
-            });
-        }
-
-        const ganador = encuesta.opciones.reduce(
-            (prev, current) =>
-                prev.votos > current.votos ? prev : current
-        );
-
-        const totalVotos = encuesta.opciones.reduce(
-            (sum, opcion) => sum + opcion.votos,
-            0
-        );
-
+        const ganador = encuesta.opciones.reduce((prev, current) => (prev.votos > current.votos) ? prev : current);
+        const totalVotos = encuesta.opciones.reduce((sum, opcion) => sum + opcion.votos, 0);
         if (ganador.votos === 0) {
-            return res.json({
-                mensaje: "No hay votos registrados para esta encuesta"
-            });
+            return { mensaje: "No hay votos registrados para esta encuesta" };
         }
 
-        return res.json({
+        return ({
             ganador: ganador.opcion,
             votosGanador: ganador.votos,
             encuesta: encuesta.opciones.map(opcion => ({
@@ -59,21 +35,32 @@ export const crearEncuesta = async (req, res) => {
         const encuesta = await prisma.encuesta.create({
             data: {
                 pregunta,
-                opciones
+                opciones: {
+                    create: opciones
+                }
+            },
+            include: {
+                opciones: true
             }
         });
         res.status(201).json(encuesta);
     } catch (error) {
         console.error("Error al crear la encuesta:", error);
         res.status(500).json({
-            error: "Error interno del servidor al crear la encuesta"
+            error: "Error interno del servidor al consultar las encuestas"
         });
     }
 };
 // GET /encuestas -> obtener las encuestas creadas
 export const obtenerEncuestas = async (req, res) => {
     try {
-        const encuestas = await prisma.productos.findMany();
+        const encuestas = await prisma.encuesta.findMany(
+            {
+                include: {
+                    opciones: true
+                }
+            }
+        );
         res.status(200).json(encuestas);
     } catch (error) {
         console.error("Error al obtener las encuestas:", error);
@@ -91,11 +78,14 @@ export const votar = async (req, res) => {
                 error: "El parámetro ID debe ser un número entero válido"
             });
         }
-        const encuestaExiste = await prisma.encuesta.findUnique({
-            where: { id }
+        const encuesta = await prisma.encuesta.findUnique({
+            where: { id },
+            include: {
+                opciones: true
+            }
         });
 
-        if (!encuestaExiste) {
+        if (!encuesta) {
             return res.status(404).json({
                 error: "Encuesta no encontrada"
             });
@@ -106,13 +96,22 @@ export const votar = async (req, res) => {
         if (!opcionSeleccionada) {
             return res.status(400).json({ error: "Opción no válida" });
         }
-        opcionSeleccionada.votos += 1;
-        return res.status(200).json({ mensaje: "Voto registrado exitosamente", encuesta });
+        await prisma.opcion.update({
+            where: {
+                id: opcionSeleccionada.id
+            },
+            data: {
+                votos: {
+                    increment: 1
+                }
+            }
+        });
+        return res.status(200).json({ mensaje: "Voto registrado exitosamente", pregunta: encuesta.pregunta, opcion: opcionSeleccionada.opcion });
 
     } catch (error) {
-        console.error("Error al crear la encuesta:", error);
+        console.error("Error al votar en la encuesta:", error);
         res.status(500).json({
-            error: "Error interno del servidor al crear la encuesta"
+            error: "Error interno del servidor al votar"
         });
     }
 };
@@ -128,7 +127,10 @@ export const obtenerResultadosEncuesta = async (req, res) => {
         }
 
         const encuesta = await prisma.encuesta.findUnique({
-            where: { id }
+            where: { id },
+            include: {
+                opciones: true
+            }
         });
 
         if (!encuesta) {

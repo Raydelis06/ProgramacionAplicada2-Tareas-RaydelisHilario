@@ -1,7 +1,7 @@
 import "dotenv/config";
 import express from "express";
 import { loggerMiddleware } from "./middlewares/logger.middleware.js";
-import carritoRoutes from "./routes/votacion.routes.js";
+import votacionRoutes from "./routes/votacion.routes.js";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -11,7 +11,7 @@ app.use(express.json());
 app.use(loggerMiddleware);
 
 // Rutas modulares
-app.use("/encuestas", carritoRoutes);
+app.use("/encuestas", votacionRoutes);
 
 // Ruta base informativa
 app.get("/", (req, res) => {

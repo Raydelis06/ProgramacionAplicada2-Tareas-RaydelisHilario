@@ -32,3 +32,16 @@ model Inventario {
   stock       Int
   stockMinimo Int
 }
+
+model Turno {
+  id       Int          @id @default(autoincrement())
+  cliente  String
+  servicio String
+  estado   EstadoTurno
+}
+
+enum EstadoTurno {
+  esperando
+  atendiendo
+  finalizado
+}

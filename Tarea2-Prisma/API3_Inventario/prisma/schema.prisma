@@ -60,3 +60,10 @@ model RegistroHabito {
   habitoId   Int
   habito     Habito   @relation(fields: [habitoId], references: [id], onDelete: Cascade)
 }
+
+model Producto {
+  id       Int    @id @default(autoincrement())
+  nombre   String
+  precio   Float
+  cantidad Int
+}

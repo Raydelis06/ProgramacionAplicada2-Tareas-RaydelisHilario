@@ -1,122 +1,74 @@
 import { prisma } from "../db.js";
 
-const obtenerResultados = (encuesta) => {
+// POST /productos - Agregar producto al carrito
+export const agregarProducto = async (req, res) => {
     try {
+        const { nombre, precio, cantidad } = req.body;
 
-        const ganador = encuesta.opciones.reduce((prev, current) => (prev.votos > current.votos) ? prev : current);
-        const totalVotos = encuesta.opciones.reduce((sum, opcion) => sum + opcion.votos, 0);
-        if (ganador.votos === 0) {
-            return { mensaje: "No hay votos registrados para esta encuesta" };
-        }
-
-        return ({
-            ganador: ganador.opcion,
-            votosGanador: ganador.votos,
-            encuesta: encuesta.opciones.map(opcion => ({
-                opcion: opcion.opcion,
-                votos: opcion.votos,
-                porcentaje:
-                    ((opcion.votos / totalVotos) * 100).toFixed(2) + "%"
-            }))
-        });
-
-    } catch (error) {
-        return res.status(500).json({
-            mensaje: "Error al obtener los resultados"
-        });
-    }
-};
-
-// POST /encuestas - Crear una nueva encuesta
-export const crearEncuesta = async (req, res) => {
-    try {
-        const { pregunta, opciones } = req.body;
-
-        const encuesta = await prisma.encuesta.create({
-            data: {
-                pregunta,
-                opciones: {
-                    create: opciones
-                }
-            },
-            include: {
-                opciones: true
-            }
-        });
-        res.status(201).json(encuesta);
-    } catch (error) {
-        console.error("Error al crear la encuesta:", error);
-        res.status(500).json({
-            error: "Error interno del servidor al consultar las encuestas"
-        });
-    }
-};
-// GET /encuestas -> obtener las encuestas creadas
-export const obtenerEncuestas = async (req, res) => {
-    try {
-        const encuestas = await prisma.encuesta.findMany(
-            {
-                include: {
-                    opciones: true
-                }
-            }
-        );
-        res.status(200).json(encuestas);
-    } catch (error) {
-        console.error("Error al obtener las encuestas:", error);
-        res.status(500).json({
-            error: "Error interno del servidor al consultar las encuestas"
-        });
-    }
-};
-// POST /encuestas/:id/votar - Registrar un voto
-export const votar = async (req, res) => {
-    try {
-        const id = parseInt(req.params.id);
-        if (isNaN(id)) {
-            return res.status(400).json({
-                error: "El parámetro ID debe ser un número entero válido"
-            });
-        }
-        const encuesta = await prisma.encuesta.findUnique({
-            where: { id },
-            include: {
-                opciones: true
-            }
-        });
-
-        if (!encuesta) {
-            return res.status(404).json({
-                error: "Encuesta no encontrada"
-            });
-        }
-        
-        const { opcion } = req.body;
-        const opcionSeleccionada = encuesta.opciones.find(o => o.opcion === opcion);
-        if (!opcionSeleccionada) {
-            return res.status(400).json({ error: "Opción no válida" });
-        }
-        await prisma.opcion.update({
+        const productoExistente = await prisma.producto.findFirst({
             where: {
-                id: opcionSeleccionada.id
-            },
-            data: {
-                votos: {
-                    increment: 1
-                }
+                nombre
             }
         });
-        return res.status(200).json({ mensaje: "Voto registrado exitosamente", pregunta: encuesta.pregunta, opcion: opcionSeleccionada.opcion });
+
+        if (productoExistente) {
+            const productoActualizado = await prisma.producto.update({
+                where: {
+                    id: productoExistente.id
+                },
+                data: {
+                    cantidad: {
+                        increment: cantidad
+                    }
+                }
+            });
+
+            return res.status(200).json({
+                mensaje: "El producto ya estaba en el carrito, se sumó la nueva cantidad",
+                producto: productoActualizado
+            });
+        }
+
+        const producto = await prisma.producto.create({
+            data: {
+                nombre,
+                precio,
+                cantidad
+            }
+        });
+
+        return res.status(201).json({
+            mensaje: "Producto agregado al carrito con éxito",
+            producto
+        });
 
     } catch (error) {
-        console.error("Error al votar en la encuesta:", error);
-        res.status(500).json({
-            error: "Error interno del servidor al votar"
+        console.error("Error al crear producto:", error);
+
+        return res.status(500).json({
+            error: "Error interno del servidor al crear el producto"
         });
     }
 };
-// GET /encuestas/:id/resultados -> Devuelve los votos por opcion y el ganador
-export const obtenerResultadosEncuesta = async (req, res) => {
+
+// GET /productos - Listar productos del carrito
+export const obtenerProductos = async (req, res) => {
+    try {
+        const productos = await prisma.producto.findMany();
+
+        return res.status(200).json(productos);
+
+    } catch (error) {
+        console.error("Error al obtener los productos:", error);
+
+        return res.status(500).json({
+            error: "Error interno del servidor al consultar los productos"
+        });
+    }
+};
+
+// PUT /productos/:id - Actualizar cantidad
+export const actualizarCantidad = async (req, res) => {
     try {
         const id = parseInt(req.params.id);
 
@@ -126,29 +78,45 @@ export const obtenerResultadosEncuesta = async (req, res) => {
             });
         }
 
-        const encuesta = await prisma.encuesta.findUnique({
-            where: { id },
-            include: {
-                opciones: true
+        const { cantidad } = req.body;
+
+        const productoExistente = await prisma.producto.findUnique({
+            where: {
+                id
             }
         });
 
-        if (!encuesta) {
+        if (!productoExistente) {
             return res.status(404).json({
-                error: "Encuesta no encontrada"
+                error: "Producto no encontrado"
             });
         }
 
-        res.json({ resultados: obtenerResultados(encuesta)});
+        const producto = await prisma.producto.update({
+            where: {
+                id
+            },
+            data: {
+                cantidad
+            }
+        });
+
+        return res.status(200).json({
+            mensaje: "Cantidad actualizada con éxito",
+            producto
+        });
+
     } catch (error) {
-        console.error("Error al buscar encuesta por ID:", error);
-        res.status(500).json({
-            error: "Error interno del servidor al buscar la encuesta"
+        console.error("Error al actualizar el producto:", error);
+
+        return res.status(500).json({
+            error: "Error interno del servidor al actualizar el producto"
         });
     }
-}
-// DELETE /encuestas/:id -> Elimina una encuesta
-export const eliminarEncuesta = async (req, res) => {
+};
+
+// DELETE /productos/:id - Eliminar producto del carrito
+export const eliminarProducto = async (req, res) => {
     try {
         const id = parseInt(req.params.id);
 
@@ -158,27 +126,88 @@ export const eliminarEncuesta = async (req, res) => {
             });
         }
 
-        const encuesta = await prisma.encuesta.findUnique({
-            where: { id }
+        const producto = await prisma.producto.findUnique({
+            where: {
+                id
+            }
         });
 
-        if (!encuesta) {
+        if (!producto) {
             return res.status(404).json({
-                error: "Tarea no encontrada"
+                error: "Producto no encontrado"
             });
         }
 
-        await prisma.encuesta.delete({
-            where: { id }
+        await prisma.producto.delete({
+            where: {
+                id
+            }
         });
 
-        res.json({
-            mensaje: "Eliminada"
+        return res.status(200).json({
+            mensaje: "Producto eliminado del carrito con éxito"
         });
+
     } catch (error) {
-        console.error("Error al eliminar la encuesta:", error);
-        res.status(500).json({
-            error: "Error interno del servidor al eliminar la encuesta"
+        console.error("Error al eliminar el producto:", error);
+
+        return res.status(500).json({
+            error: "Error interno del servidor al eliminar el producto"
         });
     }
-}
+};
+
+// GET /carrito/total - Calcular total
+export const obtenerTotalCarrito = async (req, res) => {
+    try {
+        const productos = await prisma.producto.findMany();
+
+        const total = productos.reduce(
+            (acumulado, producto) => acumulado + (producto.precio * producto.cantidad), 0 );
+
+        return res.status(200).json({
+            total
+        });
+
+    } catch (error) {
+        console.error("Error al calcular el total:", error);
+
+        return res.status(500).json({
+            error: "Error interno del servidor al calcular el total"
+        });
+    }
+};
+
+// POST /carrito/aplicar-descuento
+export const aplicarDescuento = async (req, res) => {
+    try {
+        const { porcentaje } = req.body;
+
+        const productos = await prisma.producto.findMany();
+
+        const total = productos.reduce(
+            (acumulado, producto) =>
+                acumulado + (producto.precio * producto.cantidad),
+            0
+        );
+
+        const montoDescuento = total * (porcentaje / 100);
+
+        const totalConDescuento = total - montoDescuento;
+
+        return res.status(200).json({
+            mensaje: "Descuento aplicado con éxito",
+            total,
+            porcentaje,
+            montoDescuento,
+            totalConDescuento
+        });
+
+    } catch (error) {
+        console.error("Error al aplicar descuento:", error);
+
+        return res.status(500).json({
+            error: "Error interno del servidor al aplicar el descuento"
+        });
+    }
+};

@@ -1,7 +1,9 @@
 import "dotenv/config";
 import express from "express";
 import { loggerMiddleware } from "./middlewares/logger.middleware.js";
-import votacionRoutes from "./routes/votacion.routes.js";
+import carritoRoutes from "./routes/carrito.routes.js";
+import productosRoutes from "./routes/productos.routes.js";
+
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -11,19 +13,21 @@ app.use(express.json());
 app.use(loggerMiddleware);
 
 // Rutas modulares
-app.use("/encuestas", votacionRoutes);
+app.use("/carrito", carritoRoutes);
+app.use("/productos", productosRoutes);
 
 // Ruta base informativa
 app.get("/", (req, res) => {
     res.json({
-        mensaje: "API RESTful de Sistema de votacion con Express 5 y Prisma 7",
+        mensaje: "API RESTful de Sistema de carrito de compras con Express 5 y Prisma 7",
         estado: "En línea",
         documentacion: {
-            "POST /encuestas": "Crea una nueva encuesta con opciones",
-            "GET /encuestas": "Lista todas las encuestas",
-            "POST /encuestas/:id/votar": "Registra un voto para la encuesta existente",
-            "GET /encuestas/:id/resultados": "Devuelve los votos por opcion y el ganador",
-            "DELETE /encuestas/:id": "Elimina una encuesta",
+            "GET	/productos": "Listar productos",
+            "POST	/productos":	"Agregar producto",
+            "PUT	/productos/:id":	"Actualizar cantidad",
+            "DELETE	/productos/:id":	"Eliminar producto",
+            "GET	/carrito/total":	"Calcular total (precio × cantidad)",
+            "POST	/carrito/aplicar-descuento":	"Recibe { porcentaje } y devuelve total con descuento"
             
         }
     });

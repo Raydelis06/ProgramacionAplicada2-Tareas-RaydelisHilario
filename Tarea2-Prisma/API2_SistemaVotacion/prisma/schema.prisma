@@ -25,3 +25,38 @@ model Opcion {
   encuestaId Int
   encuesta   Encuesta @relation(fields: [encuestaId], references: [id], onDelete: Cascade)
 }
+
+model Inventario {
+  id          Int    @id @default(autoincrement())
+  producto    String
+  stock       Int
+  stockMinimo Int     @default(5)
+}
+
+model Turno {
+  id       Int          @id @default(autoincrement())
+  cliente  String
+  servicio String
+  estado   EstadoTurno
+}
+
+enum EstadoTurno {
+  esperando
+  atendiendo
+  finalizado
+}
+
+model Habito {
+  id        Int              @id @default(autoincrement())
+  nombre    String
+  meta      Int
+  registros RegistroHabito[]
+}
+
+model RegistroHabito {
+  id         Int      @id @default(autoincrement())
+  fecha      DateTime
+  completado Boolean
+  habitoId   Int
+  habito     Habito   @relation(fields: [habitoId], references: [id], onDelete: Cascade)
+}

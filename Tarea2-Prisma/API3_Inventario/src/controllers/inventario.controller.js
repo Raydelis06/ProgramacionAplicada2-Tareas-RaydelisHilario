@@ -4,42 +4,32 @@ import { prisma } from "../db.js";
 // POST /inventario - Crear un nuevo producto
 export const crearProducto = async (req, res) => {
     try {
-        const { pregunta, opciones } = req.body;
+        const { producto, stock, stockMinimo } = req.body;
 
-        const encuesta = await prisma.encuesta.create({
+        const productoEnInventario = await prisma.inventario.create({
             data: {
-                pregunta,
-                opciones: {
-                    create: opciones
-                }
-            },
-            include: {
-                opciones: true
+                producto: producto,
+                stock: stock,
+                stockMinimo: stockMinimo !== undefined ? stockMinimo : 5
             }
         });
-        res.status(201).json(encuesta);
+        res.status(201).json(productoEnInventario);
     } catch (error) {
-        console.error("Error al crear la encuesta:", error);
+        console.error("Error al crear el producto:", error);
         res.status(500).json({
-            error: "Error interno del servidor al consultar las encuestas"
+            error: "Error interno del servidor al crear producto"
         });
     }
 };
 // GET /inventario -> obtener la lista de productos del inventario
 export const obtenerInventario = async (req, res) => {
     try {
-        const encuestas = await prisma.encuesta.findMany(
-            {
-                include: {
-                    opciones: true
-                }
-            }
-        );
-        res.status(200).json(encuestas);
+        const inventario = await prisma.inventario.findMany({});
+        res.status(200).json(inventario);
     } catch (error) {
-        console.error("Error al obtener las encuestas:", error);
+        console.error("Error al obtener el inventario:", error);
         res.status(500).json({
-            error: "Error interno del servidor al consultar las encuestas"
+            error: "Error interno del servidor al consultar el"
         });
     }
 };
@@ -52,40 +42,79 @@ export const registrarEntrada = async (req, res) => {
                 error: "El parámetro ID debe ser un número entero válido"
             });
         }
-        const encuesta = await prisma.encuesta.findUnique({
-            where: { id },
-            include: {
-                opciones: true
-            }
+        const producto = await prisma.inventario.findUnique({
+            where: { id }
         });
 
-        if (!encuesta) {
+        if (!producto) {
             return res.status(404).json({
-                error: "Encuesta no encontrada"
+                error: "Producto no encontrado"
             });
         }
         
-        const { opcion } = req.body;
-        const opcionSeleccionada = encuesta.opciones.find(o => o.opcion === opcion);
-        if (!opcionSeleccionada) {
-            return res.status(400).json({ error: "Opción no válida" });
-        }
-        await prisma.opcion.update({
-            where: {
-                id: opcionSeleccionada.id
-            },
-            data: {
-                votos: {
-                    increment: 1
-                }
-            }
+        const { cantidad } = req.body;
+        const inventarioActualizado = await prisma.inventario.update({ 
+            where: { id }, 
+            data: { 
+                stock: { increment: cantidad } 
+            } 
         });
-        return res.status(200).json({ mensaje: "Voto registrado exitosamente", pregunta: encuesta.pregunta, opcion: opcionSeleccionada.opcion });
+        return res.status(200).json({ mensaje: "Entrada registrada con exito", inventarioActualizado});
 
     } catch (error) {
-        console.error("Error al votar en la encuesta:", error);
+        console.error("Error al registrar la entrada:", error);
         res.status(500).json({
-            error: "Error interno del servidor al votar"
+            error: "Error interno del servidor al registrar"
+        });
+    }
+};
+// POST /inventario/:id/salida - Registrar salida
+export const registrarSalida = async (req, res) => {
+    try {
+        const id = parseInt(req.params.id);
+        if (isNaN(id)) {
+            return res.status(400).json({
+                error: "El parámetro ID debe ser un número entero válido"
+            });
+        }
+        const producto = await prisma.inventario.findUnique({
+            where: { id }
+        });
+
+        if (!producto) {
+            return res.status(404).json({
+                error: "Producto no encontrado"
+            });
+        }
+        
+        const { cantidad } = req.body;
+        const inventarioActualizado = await prisma.inventario.update({ 
+            where: { id }, 
+            data: { 
+                stock: { decrement: cantidad } 
+            } 
+        });
+        return res.status(200).json({ mensaje: "Salida registrada con exito", inventarioActualizado});
+
+    } catch (error) {
+        console.error("Error al registrar la salida:", error);
+        res.status(500).json({
+            error: "Error interno del servidor al registrar"
+        });
+    }
+};
+// GET /inventario/alertas -> obtener la lista de alertas de stock
+export const obtenerAlertas = async (req, res) => {
+    try {
+        const inventario = await prisma.inventario.findMany(); 
+        const productosPorDebajo = inventario.filter( item => item.stock <= item.stockMinimo ); 
+        const mensaje = productosPorDebajo.length > 0 ? "Hay productos con stock por debajo del mínimo" : "Productos en stock dentro de los límites"; 
+        const alertas = inventario.map(item => ({ producto: item.producto, stock: item.stock, stockMinimo: item.stockMinimo, faltanParaMinimo: item.stock - item.stockMinimo })); 
+        res.status(200).json({ mensaje, alertas });
+    } catch (error) {
+        console.error("Error al obtener las alertas:", error);
+        res.status(500).json({
+            error: "Error interno del servidor al consultar las alertas"
         });
     }
 };

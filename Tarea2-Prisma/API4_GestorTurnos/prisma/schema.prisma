@@ -30,7 +30,7 @@ model Inventario {
   id          Int    @id @default(autoincrement())
   producto    String
   stock       Int
-  stockMinimo Int
+  stockMinimo Int     @default(5)
 }
 
 model Turno {
@@ -44,4 +44,19 @@ enum EstadoTurno {
   esperando
   atendiendo
   finalizado
+}
+
+model Habito {
+  id        Int              @id @default(autoincrement())
+  nombre    String
+  meta      Int
+  registros RegistroHabito[]
+}
+
+model RegistroHabito {
+  id         Int      @id @default(autoincrement())
+  fecha      DateTime
+  completado Boolean
+  habitoId   Int
+  habito     Habito   @relation(fields: [habitoId], references: [id], onDelete: Cascade)
 }

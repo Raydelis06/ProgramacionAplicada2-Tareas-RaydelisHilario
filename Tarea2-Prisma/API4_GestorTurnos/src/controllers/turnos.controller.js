@@ -1,184 +1,144 @@
 import { prisma } from "../db.js";
 
-const obtenerResultados = (encuesta) => {
-    try {
+// POST /turnos - Crear un nuevo turno
+export const crearTurno = async (req, res) => {
+	try {
+		const { cliente, servicio } = req.body;
 
-        const ganador = encuesta.opciones.reduce((prev, current) => (prev.votos > current.votos) ? prev : current);
-        const totalVotos = encuesta.opciones.reduce((sum, opcion) => sum + opcion.votos, 0);
-        if (ganador.votos === 0) {
-            return { mensaje: "No hay votos registrados para esta encuesta" };
-        }
+		const turno = await prisma.turno.create({
+			data: {
+				cliente,
+				servicio,
+				estado: "esperando"
+			}
+		});
 
-        return ({
-            ganador: ganador.opcion,
-            votosGanador: ganador.votos,
-            encuesta: encuesta.opciones.map(opcion => ({
-                opcion: opcion.opcion,
-                votos: opcion.votos,
-                porcentaje:
-                    ((opcion.votos / totalVotos) * 100).toFixed(2) + "%"
-            }))
-        });
-
-    } catch (error) {
-        return res.status(500).json({
-            mensaje: "Error al obtener los resultados"
-        });
-    }
+		res.status(201).json({ Mensaje: "Turno creado correctamente!", Turno: turno });
+	} catch (error) {
+		console.error("Error al crear el turno:", error);
+		res.status(500).json({ error: "Error interno del servidor al crear turno" });
+	}
 };
 
-// POST /encuestas - Crear una nueva encuesta
-export const crearEncuesta = async (req, res) => {
-    try {
-        const { pregunta, opciones } = req.body;
+// GET /turnos - Obtener todos los turnos
+export const obtenerTurnos = async (req, res) => {
+	try {
+		const turnos = await prisma.turno.findMany({});
 
-        const encuesta = await prisma.encuesta.create({
-            data: {
-                pregunta,
-                opciones: {
-                    create: opciones
-                }
-            },
-            include: {
-                opciones: true
-            }
-        });
-        res.status(201).json(encuesta);
-    } catch (error) {
-        console.error("Error al crear la encuesta:", error);
-        res.status(500).json({
-            error: "Error interno del servidor al consultar las encuestas"
-        });
-    }
+		res.status(200).json({ Turnos: turnos });
+	} catch (error) {
+		console.error("Error al obtener los turnos:", error);
+		res.status(500).json({ error: "Error interno del servidor al consultar los turnos" });
+	}
 };
-// GET /encuestas -> obtener las encuestas creadas
-export const obtenerEncuestas = async (req, res) => {
-    try {
-        const encuestas = await prisma.encuesta.findMany(
-            {
-                include: {
-                    opciones: true
-                }
-            }
-        );
-        res.status(200).json(encuestas);
-    } catch (error) {
-        console.error("Error al obtener las encuestas:", error);
-        res.status(500).json({
-            error: "Error interno del servidor al consultar las encuestas"
-        });
-    }
+
+// GET /turnos/siguiente - Obtener el primer turno en espera
+export const obtenerTurnoSiguiente = async (req, res) => {
+	try {
+		const turnoSiguiente = await prisma.turno.findFirst({
+			where: { estado: "esperando" },
+			orderBy: { id: "asc" }
+		});
+
+		if (!turnoSiguiente) {
+			return res.status(400).json({ Mensaje: "No hay turnos en espera" });
+		}
+
+		res.status(200).json({ Turno: turnoSiguiente });
+	} catch (error) {
+		console.error("Error al obtener el siguiente turno:", error);
+		res.status(500).json({ error: "Error interno del servidor al consultar el siguiente turno" });
+	}
 };
-// POST /encuestas/:id/votar - Registrar un voto
-export const votar = async (req, res) => {
-    try {
-        const id = parseInt(req.params.id);
-        if (isNaN(id)) {
-            return res.status(400).json({
-                error: "El parámetro ID debe ser un número entero válido"
-            });
-        }
-        const encuesta = await prisma.encuesta.findUnique({
-            where: { id },
-            include: {
-                opciones: true
-            }
-        });
 
-        if (!encuesta) {
-            return res.status(404).json({
-                error: "Encuesta no encontrada"
-            });
-        }
-        
-        const { opcion } = req.body;
-        const opcionSeleccionada = encuesta.opciones.find(o => o.opcion === opcion);
-        if (!opcionSeleccionada) {
-            return res.status(400).json({ error: "Opción no válida" });
-        }
-        await prisma.opcion.update({
-            where: {
-                id: opcionSeleccionada.id
-            },
-            data: {
-                votos: {
-                    increment: 1
-                }
-            }
-        });
-        return res.status(200).json({ mensaje: "Voto registrado exitosamente", pregunta: encuesta.pregunta, opcion: opcionSeleccionada.opcion });
+// PUT /turnos/llamar - Pasar el primer turno en espera a atención
+export const llamarSiguiente = async (req, res) => {
+	try {
+		const turnoEnAtencion = await prisma.turno.findFirst({
+			where: { estado: "atendiendo" },
+			orderBy: { id: "asc" }
+		});
 
-    } catch (error) {
-        console.error("Error al votar en la encuesta:", error);
-        res.status(500).json({
-            error: "Error interno del servidor al votar"
-        });
-    }
+		if (turnoEnAtencion) {
+			return res.status(400).json({
+				Mensaje: "Finalice el turno actual antes de llamar otro cliente",
+				Turno: turnoEnAtencion
+			});
+		}
+
+		const turnoSiguiente = await prisma.turno.findFirst({
+			where: { estado: "esperando" },
+			orderBy: { id: "asc" }
+		});
+
+		if (!turnoSiguiente) {
+			return res.status(400).json({ Mensaje: "No hay turnos en espera" });
+		}
+
+		const turnoLlamado = await prisma.turno.update({
+			where: { id: turnoSiguiente.id },
+			data: { estado: "atendiendo" }
+		});
+
+		const siguienteEnCola = await prisma.turno.findFirst({
+			where: { estado: "esperando" },
+			orderBy: { id: "asc" }
+		});
+
+		res.status(200).json({
+			Turno: turnoLlamado,
+			Siguiente: siguienteEnCola || "No hay más turnos en espera"
+		});
+	} catch (error) {
+		console.error("Error al llamar el siguiente turno:", error);
+		res.status(500).json({ error: "Error interno del servidor al llamar el siguiente turno" });
+	}
 };
-// GET /encuestas/:id/resultados -> Devuelve los votos por opcion y el ganador
-export const obtenerResultadosEncuesta = async (req, res) => {
-    try {
-        const id = parseInt(req.params.id);
 
-        if (isNaN(id)) {
-            return res.status(400).json({
-                error: "El parámetro ID debe ser un número entero válido"
-            });
-        }
+// PUT /turnos/:id/finalizar - Marcar un turno en atención como finalizado
+export const finalizarTurno = async (req, res) => {
+	try {
+		const id = parseInt(req.params.id);
+		if (isNaN(id)) {
+			return res.status(400).json({ error: "El parámetro ID debe ser un número entero válido" });
+		}
 
-        const encuesta = await prisma.encuesta.findUnique({
-            where: { id },
-            include: {
-                opciones: true
-            }
-        });
+		const turno = await prisma.turno.findUnique({ where: { id } });
+		if (!turno) {
+			return res.status(404).json({ error: "Turno no encontrado" });
+		}
+		if (turno.estado !== "atendiendo") {
+			return res.status(400).json({
+				error: 'El turno no está en estado "atendiendo", no se puede finalizar'
+			});
+		}
 
-        if (!encuesta) {
-            return res.status(404).json({
-                error: "Encuesta no encontrada"
-            });
-        }
+		const turnoFinalizado = await prisma.turno.update({
+			where: { id },
+			data: { estado: "finalizado" }
+		});
 
-        res.json({ resultados: obtenerResultados(encuesta)});
-    } catch (error) {
-        console.error("Error al buscar encuesta por ID:", error);
-        res.status(500).json({
-            error: "Error interno del servidor al buscar la encuesta"
-        });
-    }
-}
-// DELETE /encuestas/:id -> Elimina una encuesta
-export const eliminarEncuesta = async (req, res) => {
-    try {
-        const id = parseInt(req.params.id);
+		res.status(200).json({ Mensaje: "Turno finalizado correctamente!", Turno: turnoFinalizado });
+	} catch (error) {
+		console.error("Error al finalizar el turno:", error);
+		res.status(500).json({ error: "Error interno del servidor al finalizar turno" });
+	}
+};
 
-        if (isNaN(id)) {
-            return res.status(400).json({
-                error: "El parámetro ID debe ser un número entero válido"
-            });
-        }
+// GET /turnos/espera - Obtener los turnos que siguen esperando
+export const obtenerTurnosEnEspera = async (req, res) => {
+	try {
+		const turnosEnEspera = await prisma.turno.findMany({
+			where: { estado: "esperando" },
+			orderBy: { id: "asc" }
+		});
 
-        const encuesta = await prisma.encuesta.findUnique({
-            where: { id }
-        });
-
-        if (!encuesta) {
-            return res.status(404).json({
-                error: "Tarea no encontrada"
-            });
-        }
-
-        await prisma.encuesta.delete({
-            where: { id }
-        });
-
-        res.json({
-            mensaje: "Eliminada"
-        });
-    } catch (error) {
-        console.error("Error al eliminar la encuesta:", error);
-        res.status(500).json({
-            error: "Error interno del servidor al eliminar la encuesta"
-        });
-    }
-}
+		res.status(200).json({
+			Mensaje: `Hay ${turnosEnEspera.length} turnos en espera`,
+			turnos: turnosEnEspera
+		});
+	} catch (error) {
+		console.error("Error al obtener los turnos en espera:", error);
+		res.status(500).json({ error: "Error interno del servidor al consultar los turnos en espera" });
+	}
+};

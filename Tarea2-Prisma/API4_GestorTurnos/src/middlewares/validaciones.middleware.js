@@ -1,7 +1,7 @@
 export const validarCampos = (req, res, next) => {
-  if (!req.body.pregunta || !req.body.opciones) {
+  if (!req.body.cliente || !req.body.servicio) {
     return res.status(400).json({
-      error: "La pregunta y las opciones son campos requeridos"
+      error: "El cliente y el servicio son campos requeridos"
     });
   }
   next();

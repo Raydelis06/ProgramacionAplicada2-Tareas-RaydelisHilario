@@ -1,20 +1,20 @@
 import { Router } from "express";
 import {
-    crearEncuesta,
-    obtenerEncuestas,
-    votar,
-    obtenerResultadosEncuesta,
-    eliminarEncuesta
-} from "../controllers/votacion.controller.js";
+    obtenerInventario,
+    crearProducto,
+    registrarEntrada,
+    registrarSalida,
+    obtenerAlertas
+} from "../controllers/inventario.controller.js";
 import { validarCampos } from "../middlewares/validaciones.middleware.js";
 
 const router = Router();
 
-// Definición de rutas asociadas a /encuestas
-router.post("/", validarCampos, crearEncuesta);
-router.get("/", obtenerEncuestas);
-router.post("/:id/votar", votar);
-router.get("/:id/resultados", obtenerResultadosEncuesta);
-router.delete("/:id", eliminarEncuesta);
+// Definición de rutas asociadas a /inventario
+router.post("/", validarCampos, crearProducto);
+router.get("/", obtenerInventario);
+router.post("/:id/entrada", registrarEntrada);
+router.post("/:id/salida", registrarSalida);
+router.get("/alertas", obtenerAlertas);
 
 export default router;

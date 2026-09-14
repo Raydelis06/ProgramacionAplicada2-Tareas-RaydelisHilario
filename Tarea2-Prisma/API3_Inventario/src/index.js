@@ -1,7 +1,7 @@
 import "dotenv/config";
 import express from "express";
 import { loggerMiddleware } from "./middlewares/logger.middleware.js";
-import votacionRoutes from "./routes/votacion.routes.js";
+import inventarioRoutes from "./routes/inventario.routes.js";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -11,19 +11,19 @@ app.use(express.json());
 app.use(loggerMiddleware);
 
 // Rutas modulares
-app.use("/encuestas", votacionRoutes);
+app.use("/inventario", inventarioRoutes);
 
 // Ruta base informativa
 app.get("/", (req, res) => {
     res.json({
-        mensaje: "API RESTful de Sistema de votacion con Express 5 y Prisma 7",
+        mensaje: "API RESTful de Sistema de gestion de inventario con Express 5 y Prisma 7",
         estado: "En línea",
         documentacion: {
-            "POST /encuestas": "Crea una nueva encuesta con opciones",
-            "GET /encuestas": "Lista todas las encuestas",
-            "POST /encuestas/:id/votar": "Registra un voto para la encuesta existente",
-            "GET /encuestas/:id/resultados": "Devuelve los votos por opcion y el ganador",
-            "DELETE /encuestas/:id": "Elimina una encuesta",
+            "POST /inventario": "Crea un nuevo producto con opciones",
+            "GET /inventario": "Lista todos los productos en el inventario",
+            "POST /inventario/:id/entrada": "Registra una entrada de producto",
+            "POST /inventario/:id/salida": "Registra una salida de producto",
+            "GET /inventario/alertas": "Devuelve las alertas de stock"
             
         }
     });

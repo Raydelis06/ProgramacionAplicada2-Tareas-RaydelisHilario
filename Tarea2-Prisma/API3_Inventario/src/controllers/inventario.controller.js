@@ -1,34 +1,8 @@
 import { prisma } from "../db.js";
 
-const obtenerResultados = (encuesta) => {
-    try {
 
-        const ganador = encuesta.opciones.reduce((prev, current) => (prev.votos > current.votos) ? prev : current);
-        const totalVotos = encuesta.opciones.reduce((sum, opcion) => sum + opcion.votos, 0);
-        if (ganador.votos === 0) {
-            return { mensaje: "No hay votos registrados para esta encuesta" };
-        }
-
-        return ({
-            ganador: ganador.opcion,
-            votosGanador: ganador.votos,
-            encuesta: encuesta.opciones.map(opcion => ({
-                opcion: opcion.opcion,
-                votos: opcion.votos,
-                porcentaje:
-                    ((opcion.votos / totalVotos) * 100).toFixed(2) + "%"
-            }))
-        });
-
-    } catch (error) {
-        return res.status(500).json({
-            mensaje: "Error al obtener los resultados"
-        });
-    }
-};
-
-// POST /encuestas - Crear una nueva encuesta
-export const crearEncuesta = async (req, res) => {
+// POST /inventario - Crear un nuevo producto
+export const crearProducto = async (req, res) => {
     try {
         const { pregunta, opciones } = req.body;
 
@@ -51,8 +25,8 @@ export const crearEncuesta = async (req, res) => {
         });
     }
 };
-// GET /encuestas -> obtener las encuestas creadas
-export const obtenerEncuestas = async (req, res) => {
+// GET /inventario -> obtener la lista de productos del inventario
+export const obtenerInventario = async (req, res) => {
     try {
         const encuestas = await prisma.encuesta.findMany(
             {
@@ -69,8 +43,8 @@ export const obtenerEncuestas = async (req, res) => {
         });
     }
 };
-// POST /encuestas/:id/votar - Registrar un voto
-export const votar = async (req, res) => {
+// POST /inventario/:id/entrada - Registrar entrada
+export const registrarEntrada = async (req, res) => {
     try {
         const id = parseInt(req.params.id);
         if (isNaN(id)) {
@@ -115,70 +89,3 @@ export const votar = async (req, res) => {
         });
     }
 };
-// GET /encuestas/:id/resultados -> Devuelve los votos por opcion y el ganador
-export const obtenerResultadosEncuesta = async (req, res) => {
-    try {
-        const id = parseInt(req.params.id);
-
-        if (isNaN(id)) {
-            return res.status(400).json({
-                error: "El parámetro ID debe ser un número entero válido"
-            });
-        }
-
-        const encuesta = await prisma.encuesta.findUnique({
-            where: { id },
-            include: {
-                opciones: true
-            }
-        });
-
-        if (!encuesta) {
-            return res.status(404).json({
-                error: "Encuesta no encontrada"
-            });
-        }
-
-        res.json({ resultados: obtenerResultados(encuesta)});
-    } catch (error) {
-        console.error("Error al buscar encuesta por ID:", error);
-        res.status(500).json({
-            error: "Error interno del servidor al buscar la encuesta"
-        });
-    }
-}
-// DELETE /encuestas/:id -> Elimina una encuesta
-export const eliminarEncuesta = async (req, res) => {
-    try {
-        const id = parseInt(req.params.id);
-
-        if (isNaN(id)) {
-            return res.status(400).json({
-                error: "El parámetro ID debe ser un número entero válido"
-            });
-        }
-
-        const encuesta = await prisma.encuesta.findUnique({
-            where: { id }
-        });
-
-        if (!encuesta) {
-            return res.status(404).json({
-                error: "Tarea no encontrada"
-            });
-        }
-
-        await prisma.encuesta.delete({
-            where: { id }
-        });
-
-        res.json({
-            mensaje: "Eliminada"
-        });
-    } catch (error) {
-        console.error("Error al eliminar la encuesta:", error);
-        res.status(500).json({
-            error: "Error interno del servidor al eliminar la encuesta"
-        });
-    }
-}

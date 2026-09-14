@@ -49,7 +49,7 @@ enum EstadoTurno {
 model Habito {
   id        Int              @id @default(autoincrement())
   nombre    String
-  meta      Int
+  meta      String
   registros RegistroHabito[]
 }
 

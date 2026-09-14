@@ -5,7 +5,7 @@ import {
     registrarHabitoDiario,
     obtenerEstadisticas,
     eliminarHabito
-} from "../controllers/votacion.controller.js";
+} from "../controllers/habitos.controller.js";
 import { validarCampos } from "../middlewares/validaciones.middleware.js";
 
 const router = Router();

@@ -1,184 +1,201 @@
 import { prisma } from "../db.js";
 
-const obtenerResultados = (encuesta) => {
-    try {
+const soloFecha = (fecha) => {
+    const fechaLocal = new Date(fecha);
+    const año = fechaLocal.getFullYear();
+    const mes = String(fechaLocal.getMonth() + 1).padStart(2, "0");
+    const dia = String(fechaLocal.getDate()).padStart(2, "0");
+    return `${año}-${mes}-${dia}`;
+};
 
-        const ganador = encuesta.opciones.reduce((prev, current) => (prev.votos > current.votos) ? prev : current);
-        const totalVotos = encuesta.opciones.reduce((sum, opcion) => sum + opcion.votos, 0);
-        if (ganador.votos === 0) {
-            return { mensaje: "No hay votos registrados para esta encuesta" };
+const calcularEstadisticas = (habito) => {
+    const registrosOrdenados = [...habito.registros].sort(
+        (a, b) => new Date(a.fecha) - new Date(b.fecha)
+    );
+    const diasCompletados = registrosOrdenados.filter(registro => registro.completado);
+
+    let mejorRacha = 0;
+    let rachaTemporal = 0;
+    let fechaAnterior = null;
+
+    for (const registro of registrosOrdenados) {
+        if (!registro.completado) {
+            rachaTemporal = 0;
+            fechaAnterior = null;
+            continue;
         }
 
-        return ({
-            ganador: ganador.opcion,
-            votosGanador: ganador.votos,
-            encuesta: encuesta.opciones.map(opcion => ({
-                opcion: opcion.opcion,
-                votos: opcion.votos,
-                porcentaje:
-                    ((opcion.votos / totalVotos) * 100).toFixed(2) + "%"
-            }))
-        });
+        const fechaActual = new Date(`${soloFecha(registro.fecha)}T00:00:00`);
+        if (fechaAnterior) {
+            const diferenciaDias = Math.round(
+                (fechaActual - fechaAnterior) / (1000 * 60 * 60 * 24)
+            );
+            rachaTemporal = diferenciaDias === 1 ? rachaTemporal + 1 : 1;
+        } else {
+            rachaTemporal = 1;
+        }
 
-    } catch (error) {
-        return res.status(500).json({
-            mensaje: "Error al obtener los resultados"
-        });
+        mejorRacha = Math.max(mejorRacha, rachaTemporal);
+        fechaAnterior = fechaActual;
     }
-};
 
-// POST /encuestas - Crear una nueva encuesta
-export const crearEncuesta = async (req, res) => {
-    try {
-        const { pregunta, opciones } = req.body;
+    let rachaActual = 0;
+    for (let i = registrosOrdenados.length - 1; i >= 0; i--) {
+        const registro = registrosOrdenados[i];
+        if (!registro.completado) break;
 
-        const encuesta = await prisma.encuesta.create({
-            data: {
-                pregunta,
-                opciones: {
-                    create: opciones
-                }
-            },
-            include: {
-                opciones: true
-            }
-        });
-        res.status(201).json(encuesta);
-    } catch (error) {
-        console.error("Error al crear la encuesta:", error);
-        res.status(500).json({
-            error: "Error interno del servidor al consultar las encuestas"
-        });
-    }
-};
-// GET /encuestas -> obtener las encuestas creadas
-export const obtenerEncuestas = async (req, res) => {
-    try {
-        const encuestas = await prisma.encuesta.findMany(
-            {
-                include: {
-                    opciones: true
-                }
-            }
+        if (i === registrosOrdenados.length - 1) {
+            rachaActual = 1;
+            continue;
+        }
+
+        const fechaActual = new Date(`${soloFecha(registro.fecha)}T00:00:00`);
+        const fechaSiguiente = new Date(`${soloFecha(registrosOrdenados[i + 1].fecha)}T00:00:00`);
+        const diferenciaDias = Math.round(
+            (fechaSiguiente - fechaActual) / (1000 * 60 * 60 * 24)
         );
-        res.status(200).json(encuestas);
-    } catch (error) {
-        console.error("Error al obtener las encuestas:", error);
-        res.status(500).json({
-            error: "Error interno del servidor al consultar las encuestas"
-        });
-    }
-};
-// POST /encuestas/:id/votar - Registrar un voto
-export const votar = async (req, res) => {
-    try {
-        const id = parseInt(req.params.id);
-        if (isNaN(id)) {
-            return res.status(400).json({
-                error: "El parámetro ID debe ser un número entero válido"
-            });
-        }
-        const encuesta = await prisma.encuesta.findUnique({
-            where: { id },
-            include: {
-                opciones: true
-            }
-        });
 
-        if (!encuesta) {
-            return res.status(404).json({
-                error: "Encuesta no encontrada"
-            });
+        if (diferenciaDias === 1) {
+            rachaActual += 1;
+        } else {
+            break;
         }
-        
-        const { opcion } = req.body;
-        const opcionSeleccionada = encuesta.opciones.find(o => o.opcion === opcion);
-        if (!opcionSeleccionada) {
-            return res.status(400).json({ error: "Opción no válida" });
+    }
+
+    const porcentajeCumplimiento = habito.registros.length > 0
+        ? `${((diasCompletados.length / habito.registros.length) * 100).toFixed(2)}%`
+        : "0%";
+
+    return { rachaActual, mejorRacha, porcentajeCumplimiento };
+};
+
+// POST /habitos - Crear un nuevo hábito
+export const crearHabito = async (req, res) => {
+    try {
+        const { nombre, meta } = req.body;
+        const habitoExistente = await prisma.habito.findFirst({ where: { nombre } });
+
+        if (habitoExistente) {
+            return res.status(400).json({ Mensaje: "El hábito ya existe." });
         }
-        await prisma.opcion.update({
-            where: {
-                id: opcionSeleccionada.id
-            },
+
+        const habito = await prisma.habito.create({
             data: {
-                votos: {
-                    increment: 1
-                }
+                nombre,
+                meta
             }
         });
-        return res.status(200).json({ mensaje: "Voto registrado exitosamente", pregunta: encuesta.pregunta, opcion: opcionSeleccionada.opcion });
 
+        res.status(201).json({ Mensaje: "Hábito creado exitosamente!", habito });
     } catch (error) {
-        console.error("Error al votar en la encuesta:", error);
-        res.status(500).json({
-            error: "Error interno del servidor al votar"
-        });
+        console.error("Error al crear el hábito:", error);
+        res.status(500).json({ error: "Error interno del servidor al crear hábito" });
     }
 };
-// GET /encuestas/:id/resultados -> Devuelve los votos por opcion y el ganador
-export const obtenerResultadosEncuesta = async (req, res) => {
+
+// GET /habitos - Obtener los hábitos creados
+export const obtenerHabitos = async (req, res) => {
+    try {
+        const habitos = await prisma.habito.findMany({
+            include: { registros: true },
+            orderBy: { id: "asc" }
+        });
+
+        res.status(200).json(habitos);
+    } catch (error) {
+        console.error("Error al obtener los hábitos:", error);
+        res.status(500).json({ error: "Error interno del servidor al consultar los hábitos" });
+    }
+};
+
+// POST /habitos/:id/registrar - Registrar el cumplimiento del día
+export const registrarHabitoDiario = async (req, res) => {
     try {
         const id = parseInt(req.params.id);
-
         if (isNaN(id)) {
-            return res.status(400).json({
-                error: "El parámetro ID debe ser un número entero válido"
-            });
+            return res.status(400).json({ error: "El parámetro ID debe ser un número entero válido" });
         }
 
-        const encuesta = await prisma.encuesta.findUnique({
-            where: { id },
-            include: {
-                opciones: true
+        const habito = await prisma.habito.findUnique({ where: { id } });
+        if (!habito) {
+            return res.status(404).json({ Mensaje: "Hábito no encontrado." });
+        }
+
+        const hoy = new Date();
+        const inicioDelDia = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate());
+        const inicioDelSiguienteDia = new Date(inicioDelDia);
+        inicioDelSiguienteDia.setDate(inicioDelSiguienteDia.getDate() + 1);
+        const registroExistente = await prisma.registroHabito.findFirst({
+            where: {
+                habitoId: id,
+                fecha: { gte: inicioDelDia, lt: inicioDelSiguienteDia }
             }
         });
 
-        if (!encuesta) {
-            return res.status(404).json({
-                error: "Encuesta no encontrada"
-            });
+        if (registroExistente) {
+            return res.status(400).json({ Mensaje: "El hábito ya fue registrado hoy." });
         }
 
-        res.json({ resultados: obtenerResultados(encuesta)});
-    } catch (error) {
-        console.error("Error al buscar encuesta por ID:", error);
-        res.status(500).json({
-            error: "Error interno del servidor al buscar la encuesta"
+        const registro = await prisma.registroHabito.create({
+            data: {
+                fecha: hoy,
+                completado: true,
+                habitoId: id
+            }
         });
+
+        res.status(201).json({ Mensaje: "Hábito registrado exitosamente!", registro });
+    } catch (error) {
+        console.error("Error al registrar el hábito:", error);
+        res.status(500).json({ error: "Error interno del servidor al registrar el hábito" });
     }
-}
-// DELETE /encuestas/:id -> Elimina una encuesta
-export const eliminarEncuesta = async (req, res) => {
+};
+
+// GET /habitos/:id/estadisticas - Obtener las estadísticas del hábito
+export const obtenerEstadisticas = async (req, res) => {
     try {
         const id = parseInt(req.params.id);
-
         if (isNaN(id)) {
-            return res.status(400).json({
-                error: "El parámetro ID debe ser un número entero válido"
-            });
+            return res.status(400).json({ error: "El parámetro ID debe ser un número entero válido" });
         }
 
-        const encuesta = await prisma.encuesta.findUnique({
-            where: { id }
+        const habito = await prisma.habito.findUnique({
+            where: { id },
+            include: { registros: true }
         });
 
-        if (!encuesta) {
-            return res.status(404).json({
-                error: "Tarea no encontrada"
-            });
+        if (!habito) {
+            return res.status(404).json({ Mensaje: "Hábito no encontrado." });
         }
 
-        await prisma.encuesta.delete({
-            where: { id }
-        });
-
-        res.json({
-            mensaje: "Eliminada"
+        res.status(200).json({
+            habito: habito.nombre,
+            estadisticas: calcularEstadisticas(habito)
         });
     } catch (error) {
-        console.error("Error al eliminar la encuesta:", error);
-        res.status(500).json({
-            error: "Error interno del servidor al eliminar la encuesta"
-        });
+        console.error("Error al obtener las estadísticas:", error);
+        res.status(500).json({ error: "Error interno del servidor al obtener las estadísticas" });
     }
-}
+};
+
+// DELETE /habitos/:id - Eliminar un hábito
+export const eliminarHabito = async (req, res) => {
+    try {
+        const id = parseInt(req.params.id);
+        if (isNaN(id)) {
+            return res.status(400).json({ error: "El parámetro ID debe ser un número entero válido" });
+        }
+
+        const habito = await prisma.habito.findUnique({ where: { id } });
+        if (!habito) {
+            return res.status(404).json({ Mensaje: "Hábito no encontrado." });
+        }
+
+        await prisma.habito.delete({ where: { id } });
+
+        res.status(200).json({ Mensaje: "Hábito eliminado exitosamente!" });
+    } catch (error) {
+        console.error("Error al eliminar el hábito:", error);
+        res.status(500).json({ error: "Error interno del servidor al eliminar el hábito" });
+    }
+};

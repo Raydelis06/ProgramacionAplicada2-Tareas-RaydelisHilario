@@ -1,7 +1,7 @@
 export const validarCampos = (req, res, next) => {
-  if (!req.body.pregunta || !req.body.opciones) {
+  if (!req.body.nombre || !req.body.meta) {
     return res.status(400).json({
-      error: "La pregunta y las opciones son campos requeridos"
+      error: "El nombre y la meta son campos requeridos"
     });
   }
   next();

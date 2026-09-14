@@ -1,7 +1,7 @@
 import "dotenv/config";
 import express from "express";
 import { loggerMiddleware } from "./middlewares/logger.middleware.js";
-import votacionRoutes from "./routes/votacion.routes.js";
+import habitosRoutes from "./routes/habitos.routes.js";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -11,20 +11,19 @@ app.use(express.json());
 app.use(loggerMiddleware);
 
 // Rutas modulares
-app.use("/encuestas", votacionRoutes);
+app.use("/habitos", habitosRoutes);
 
 // Ruta base informativa
 app.get("/", (req, res) => {
     res.json({
-        mensaje: "API RESTful de Sistema de votacion con Express 5 y Prisma 7",
+        mensaje: "API RESTful de Sistema de registro de habitos con Express 5 y Prisma 7",
         estado: "En línea",
         documentacion: {
-            "POST /encuestas": "Crea una nueva encuesta con opciones",
-            "GET /encuestas": "Lista todas las encuestas",
-            "POST /encuestas/:id/votar": "Registra un voto para la encuesta existente",
-            "GET /encuestas/:id/resultados": "Devuelve los votos por opcion y el ganador",
-            "DELETE /encuestas/:id": "Elimina una encuesta",
-            
+            "POST	/habitos":	"Crear hábito con meta diaria",
+            "GET	/habitos":	"Listar hábitos",
+            "POST	/habitos/:id/registrar":	"Marcar hábito del día como completado",
+            "GET	/habitos/:id/estadisticas":	"Racha actual, mejor racha, % cumplimiento",
+            "DELETE	/habitos/:id":	"Eliminar hábito"
         }
     });
 });

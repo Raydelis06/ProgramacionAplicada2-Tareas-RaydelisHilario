@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "Habito" ALTER COLUMN "meta" SET DATA TYPE TEXT;

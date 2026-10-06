@@ -24,9 +24,9 @@ export default function TabLayout() {
           tabBarIcon: ({ color }) => (
             <SymbolView
               name={{
-                ios: 'chevron.left.forwardslash.chevron.right',
-                android: 'code',
-                web: 'code',
+                ios: 'house',
+                android: 'home',
+                web: 'home',
               }}
               tintColor={color}
               size={28}
@@ -55,9 +55,9 @@ export default function TabLayout() {
           tabBarIcon: ({ color }) => (
             <SymbolView
               name={{
-                ios: 'chevron.left.forwardslash.chevron.right',
-                android: 'code',
-                web: 'code',
+                ios: 'shippingbox.fill',
+                android: 'inventory_2',
+                web: 'inventory_2',
               }}
               tintColor={color}
               size={28}

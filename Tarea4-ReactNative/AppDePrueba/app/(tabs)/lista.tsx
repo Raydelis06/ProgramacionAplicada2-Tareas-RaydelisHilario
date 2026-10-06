@@ -3,7 +3,7 @@ import { FlatList, StyleSheet } from 'react-native';
 import EditScreenInfo from '@/components/EditScreenInfo';
 import { Text, View } from '@/components/Themed';
 
-const productos = [
+export const productos = [
   { id: 1, nombre: 'Cargador para telefono', precio: 350, stock:20 },
   { id: 2, nombre: 'Audífonos inalambricos', precio: 1500, stock:15 },
   { id: 3, nombre: 'Tableta Samsung 128GB', precio: 78600, stock:10 },
@@ -40,6 +40,8 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 20,
     fontWeight: 'bold',
+    paddingTop: 50,
+    color: '#dc6796',
   },
   separator: {
     marginVertical: 30,

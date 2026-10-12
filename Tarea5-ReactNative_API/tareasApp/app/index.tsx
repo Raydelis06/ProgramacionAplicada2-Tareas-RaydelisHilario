@@ -11,7 +11,7 @@ export default function TabOneScreen() {
   const router = useRouter();
 
   const iniciarSesion = () => {
-    alert('Iniciar sesión como ' + '"' + email + '"');
+    router.push("/(tabs)/home");
   };
   const irRegistro = () => {
     router.push("/registro");
@@ -27,6 +27,7 @@ export default function TabOneScreen() {
         value={email}
         onChangeText={setEmail}
         placeholder="ejemplo@email.com"
+        placeholderTextColor={'#ffffff8d'}
         keyboardType="email-address"
         autoCapitalize="none"
         autoCorrect={false}
@@ -38,6 +39,7 @@ export default function TabOneScreen() {
         value={password}
         onChangeText={setPassword}
         placeholder="********"
+        placeholderTextColor={'#ffffff8d'}
         secureTextEntry
       />
 
@@ -56,28 +58,27 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     paddingHorizontal: 24,
-    backgroundColor: '#f5f5f5',
   },
   title: {
     fontSize: 28,
     fontWeight: '700',
     marginBottom: 24,
-    color: '#111827',
+    color: '#6c97f4',
   },
   label: {
     fontSize: 14,
     fontWeight: '600',
     marginBottom: 8,
-    color: '#374151',
+    color: '#95abcf',
   },
   input: {
     height: 46,
     borderWidth: 1,
-    borderColor: '#d1d5db',
+    borderColor: '#ffffff8d',
     borderRadius: 10,
     paddingHorizontal: 12,
     marginBottom: 16,
-    backgroundColor: '#ffffff',
+    backgroundColor: '#ffffff33',
   },
   button: {
     marginTop: 8,

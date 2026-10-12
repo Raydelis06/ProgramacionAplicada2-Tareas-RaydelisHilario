@@ -11,7 +11,8 @@ export default function TabOneScreen() {
   const router = useRouter();
 
   const crearCuenta = () => {
-    alert('crear cuenta como ' + '"' + email + '"');
+    alert('Cuenta creada como ' + '"' + email + '"');
+    router.push('/')
   };
 
   const irLogin = () => {
@@ -21,14 +22,15 @@ export default function TabOneScreen() {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Crear Cuenta</Text>
-
       <Text style={styles.label}>Nombre</Text>
+      
       <TextInput
         style={styles.input}
         value={name}
         onChangeText={setName}
         placeholder="Tu nombre"
         autoCapitalize="none"
+        placeholderTextColor={'#ffffff8d'}
         autoCorrect={false}
       />
 
@@ -39,6 +41,7 @@ export default function TabOneScreen() {
         onChangeText={setEmail}
         placeholder="ejemplo@email.com"
         keyboardType="email-address"
+        placeholderTextColor={'#ffffff8d'}
         autoCapitalize="none"
         autoCorrect={false}
       />
@@ -48,6 +51,7 @@ export default function TabOneScreen() {
         style={styles.input}
         value={password}
         onChangeText={setPassword}
+        placeholderTextColor={'#ffffff8d'}
         placeholder="********"
         secureTextEntry
       />
@@ -67,28 +71,27 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     paddingHorizontal: 24,
-    backgroundColor: '#f5f5f5',
   },
   title: {
     fontSize: 28,
     fontWeight: '700',
     marginBottom: 24,
-    color: '#111827',
+    color: '#6c97f4',
   },
   label: {
     fontSize: 14,
     fontWeight: '600',
     marginBottom: 8,
-    color: '#374151',
+    color: '#95abcf',
   },
   input: {
     height: 46,
     borderWidth: 1,
-    borderColor: '#d1d5db',
+    borderColor: '#ffffff8d',
     borderRadius: 10,
     paddingHorizontal: 12,
     marginBottom: 16,
-    backgroundColor: '#ffffff',
+    backgroundColor: '#ffffff33',
   },
   button: {
     marginTop: 8,

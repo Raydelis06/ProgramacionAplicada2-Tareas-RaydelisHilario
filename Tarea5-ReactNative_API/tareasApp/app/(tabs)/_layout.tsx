@@ -33,11 +33,11 @@ export default function TabLayout() {
             />
           ),
           headerRight: () => (
-            <Link href="/modal" asChild>
+            <Link href="/" asChild>
               <Pressable style={{ marginRight: 15 }}>
                 {({ pressed }) => (
                   <SymbolView
-                    name={{ ios: 'info.circle', android: 'info', web: 'info' }}
+                    name={{ ios: 'info.circle', android: 'logout', web: 'logout' }}
                     size={25}
                     tintColor={Colors[colorScheme].text}
                     style={{ opacity: pressed ? 0.5 : 1 }}
@@ -46,6 +46,13 @@ export default function TabLayout() {
               </Pressable>
             </Link>
           ),
+        }}
+      />
+      <Tabs.Screen
+        name="nuevaTarea"
+        options={{
+          href: null,
+          title: 'Nueva tarea',
         }}
       />
     </Tabs>

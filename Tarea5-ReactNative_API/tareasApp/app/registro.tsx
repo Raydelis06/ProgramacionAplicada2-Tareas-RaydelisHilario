@@ -3,16 +3,38 @@ import { StyleSheet, TextInput, TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
 
 import { Text, View } from '@/components/Themed';
+import { registrarUsuario } from '@/services/api';
 
 export default function TabOneScreen() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [cargando, setCargando] = useState(false);
+  const [error, setError] = useState('');
+  const [mensaje, setMensaje] = useState('');
   const router = useRouter();
 
-  const crearCuenta = () => {
-    alert('Cuenta creada como ' + '"' + email + '"');
-    router.push('/')
+  const crearCuenta = async () => {
+    if (!name.trim() || !email.trim() || !password) {
+      setError('Completa todos los campos.');
+      return;
+    }
+
+    setCargando(true);
+    setError('');
+    setMensaje('');
+    try {
+      await registrarUsuario(name.trim(), email.trim(), password);
+      setMensaje('Cuenta creada. Ya puedes iniciar sesión.');
+      setName('');
+      setEmail('');
+      setPassword('');
+      irLogin();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'No se pudo crear la cuenta.');
+    } finally {
+      setCargando(false);
+    }
   };
 
   const irLogin = () => {
@@ -56,8 +78,17 @@ export default function TabOneScreen() {
         secureTextEntry
       />
 
-      <TouchableOpacity style={styles.button} onPress={crearCuenta}>
-        <Text style={styles.buttonText}>Crear cuenta</Text>
+      {!!error && <Text style={styles.error}>{error}</Text>}
+      {!!mensaje && <Text style={styles.success}>{mensaje}</Text>}
+
+      <TouchableOpacity
+        style={[styles.button, cargando && styles.buttonDisabled]}
+        onPress={crearCuenta}
+        disabled={cargando}
+      >
+        <Text style={styles.buttonText}>
+          {cargando ? 'Creando cuenta...' : 'Crear cuenta'}
+        </Text>
       </TouchableOpacity>
       <TouchableOpacity style={styles.link} onPress={irLogin}>
         <Text style={styles.link}>Ya tienes una cuenta? Inicia sesión</Text>
@@ -105,6 +136,17 @@ const styles = StyleSheet.create({
     color: '#ffffff',
     fontSize: 16,
     fontWeight: '600',
+  },
+  buttonDisabled: {
+    opacity: 0.6,
+  },
+  error: {
+    color: '#ff8a8a',
+    marginBottom: 12,
+  },
+  success: {
+    color: '#86efac',
+    marginBottom: 12,
   },
   link: {
     marginTop: 16,

@@ -3,16 +3,33 @@ import { StyleSheet, TextInput, TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
 
 import { Text, View } from '@/components/Themed';
+import { iniciarSesion } from '@/services/api';
 
 export default function TabOneScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-
+  const [cargando, setCargando] = useState(false);
+  const [error, setError] = useState('');
   const router = useRouter();
 
-  const iniciarSesion = () => {
-    router.push("/(tabs)/home");
+  const handleIniciarSesion = async () => {
+    if (!email.trim() || !password) {
+      setError('Escribe tu email y contraseña.');
+      return;
+    }
+
+    setCargando(true);
+    setError('');
+    try {
+      await iniciarSesion(email.trim(), password);
+      router.replace('/(tabs)/home');
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'No se pudo iniciar sesión.');
+    } finally {
+      setCargando(false);
+    }
   };
+
   const irRegistro = () => {
     router.push("/registro");
   };
@@ -43,8 +60,16 @@ export default function TabOneScreen() {
         secureTextEntry
       />
 
-      <TouchableOpacity style={styles.button} onPress={iniciarSesion}>
-        <Text style={styles.buttonText}>Iniciar sesión</Text>
+      {!!error && <Text style={styles.error}>{error}</Text>}
+
+      <TouchableOpacity
+        style={[styles.button, cargando && styles.buttonDisabled]}
+        onPress={handleIniciarSesion}
+        disabled={cargando}
+      >
+        <Text style={styles.buttonText}>
+          {cargando ? 'Iniciando sesión...' : 'Iniciar sesión'}
+        </Text>
       </TouchableOpacity>
       <TouchableOpacity style={styles.link} onPress={irRegistro}>
         <Text style={styles.link}>No tienes una cuenta? Regístrate</Text>
@@ -92,6 +117,13 @@ const styles = StyleSheet.create({
     color: '#ffffff',
     fontSize: 16,
     fontWeight: '600',
+  },
+  buttonDisabled: {
+    opacity: 0.6,
+  },
+  error: {
+    color: '#ff8a8a',
+    marginBottom: 12,
   },
   link: {
     marginTop: 16,

@@ -1,35 +1,66 @@
+import { useCallback, useState } from 'react';
 import { FlatList, StyleSheet, TouchableOpacity } from 'react-native';
+import { useFocusEffect, useRouter } from 'expo-router';
 
-import EditScreenInfo from '@/components/EditScreenInfo';
 import { Text, View } from '@/components/Themed';
-import { SymbolView } from 'expo-symbols';
+import { obtenerTareas, type Tarea } from '@/services/api';
 
 export default function TabTwoScreen() {
-  const tareas = [
-    {id: 1, titulo: 'Tarea de prueba', completada: false, fecha:'10/10/2020'},
-    {id: 2, titulo: 'Tarea de prueba 2', completada: true, fecha:'10/10/2020'}
+  const [tareas, setTareas] = useState<Tarea[]>([]);
+  const [cargando, setCargando] = useState(true);
+  const [error, setError] = useState('');
+  const router = useRouter();
 
-  ]
+  const cargarTareas = useCallback(async () => {
+    setCargando(true);
+    setError('');
+    try {
+      setTareas(await obtenerTareas());
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'No se pudieron cargar las tareas.');
+    } finally {
+      setCargando(false);
+    }
+  }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      void cargarTareas();
+    }, [cargarTareas]),
+  );
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Tareas</Text>
-      <FlatList data={tareas}
-      keyExtractor={(item) => item.id.toString()}
-      renderItem={({ item }) => (
-        <TouchableOpacity >
+      <TouchableOpacity
+        style={styles.button}
+        onPress={() => router.push('/(tabs)/nuevaTarea')}
+      >
+        <Text style={styles.buttonText}>Crear tarea</Text>
+      </TouchableOpacity>
+
+      {!!error && <Text style={styles.error}>{error}</Text>}
+      {cargando && <Text style={styles.message}>Cargando tareas...</Text>}
+      {!cargando && !error && tareas.length === 0 && (
+        <Text style={styles.message}>Todavía no tienes tareas.</Text>
+      )}
+
+      <FlatList
+        data={tareas}
+        keyExtractor={(item) => item.id.toString()}
+        renderItem={({ item }) => (
           <View style={styles.containerHorizontal}>
             <View style={styles.tarea}>
-              <Text style={styles.tareaText}>{item.titulo} </Text>
-              <Text style={styles.tareaDetailText}>{item.fecha}</Text>
+              <Text style={styles.tareaText}>{item.titulo}</Text>
+              <Text style={styles.tareaDetailText}>
+                {new Date(item.creadoEn).toLocaleDateString()}
+                {' · '}
+                {item.completada ? 'Completada' : 'Pendiente'}
+              </Text>
             </View>
           </View>
-          
-        </TouchableOpacity>
-          
         )}
-      >
-
-      </FlatList>
+      />
     </View>
   );
 }
@@ -37,12 +68,11 @@ export default function TabTwoScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
     paddingHorizontal: 24,
+    paddingTop: 24,
   },
   containerHorizontal: {
     flex: 1,
-
   },
   title: {
     fontSize: 28,
@@ -50,23 +80,9 @@ const styles = StyleSheet.create({
     marginBottom: 24,
     color: '#6c97f4',
   },
-  label: {
-    fontSize: 14,
-    fontWeight: '600',
-    marginBottom: 8,
-    color: '#95abcf',
-  },
-  input: {
-    height: 46,
-    borderWidth: 1,
-    borderColor: '#ffffff8d',
-    borderRadius: 10,
-    paddingHorizontal: 12,
-    marginBottom: 16,
-    backgroundColor: '#ffffff33',
-  },
   button: {
     marginTop: 8,
+    marginBottom: 16,
     backgroundColor: '#2563eb',
     height: 46,
     borderRadius: 10,
@@ -78,11 +94,13 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
   },
-  link: {
-    marginTop: 16,
-    color: '#2563eb',
-    fontSize: 14,
-    textAlign: 'center',
+  message: {
+    color: '#a7a7a7',
+    marginBottom: 12,
+  },
+  error: {
+    color: '#ff8a8a',
+    marginBottom: 12,
   },
   tarea: {
     backgroundColor: '#ffffff33',

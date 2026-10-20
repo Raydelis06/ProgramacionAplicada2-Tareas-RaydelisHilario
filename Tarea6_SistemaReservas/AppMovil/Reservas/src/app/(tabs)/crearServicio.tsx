@@ -43,8 +43,8 @@ export default function CrearServicioScreen() {
       await crearServicio(
         nombre.trim(),
         descripcion.trim(),
-        precioNumerico,
         duracionNumerica,
+        precioNumerico,
       );
       Alert.alert("Servicio creado", "El servicio se guardó correctamente.", [
         { text: "Aceptar", onPress: () => router.replace("/(tabs)/home") },

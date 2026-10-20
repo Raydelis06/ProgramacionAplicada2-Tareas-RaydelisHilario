@@ -43,18 +43,20 @@ export async function obtenerServicios(): Promise<Servicio[]> {
       typeof item.id !== "number" ||
       typeof item.nombre !== "string" ||
       typeof item.descripcion !== "string" ||
-      typeof item.duracion !== "number" ||
-      typeof item.precio !== "number"
+      typeof item.duracion !== "number"
     ) {
       throw new Error("La API devolvió un servicio con formato no válido.");
     }
-
+    const precio = Number(item.precio);
+    if (!Number.isFinite(precio)) {
+      throw new Error("La API devolvió un servicio con precio no válido.");
+    }
     return {
       id: item.id,
       nombre: item.nombre,
       descripcion: item.descripcion,
       duracion: item.duracion,
-      precio: item.precio,
+      precio,
     };
   });
 }

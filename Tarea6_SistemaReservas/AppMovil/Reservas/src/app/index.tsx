@@ -22,7 +22,7 @@ export default function TabOneScreen() {
     setError('');
     try {
       await iniciarSesion(email.trim(), password);
-      router.push('/home');
+      router.replace('/home');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'No se pudo iniciar sesión.');
     } finally {

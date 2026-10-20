@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { StyleSheet, TextInput, TouchableOpacity, View, Text, Image } from 'react-native';
 import { useRouter } from 'expo-router';
 
-import { registrar } from '../services/auth';
+import { registrarUsuario } from '../services/auth';
 import { Colors } from '@/constants/theme';
 
 export default function registroScreen() {
@@ -22,7 +22,7 @@ export default function registroScreen() {
     setCargando(true);
     setError('');
     try {
-      await registrar(nombre, email.trim(), password);
+      await registrarUsuario(nombre, email.trim(), password);
       router.push('/');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'No se pudo completar el registro.');

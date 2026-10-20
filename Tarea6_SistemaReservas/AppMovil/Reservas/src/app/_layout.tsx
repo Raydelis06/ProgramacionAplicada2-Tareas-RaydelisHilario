@@ -1,10 +1,11 @@
 import { useFonts } from 'expo-font';
 import { DarkTheme, DefaultTheme, Stack, ThemeProvider } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import 'react-native-reanimated';
 
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -18,6 +19,7 @@ export const unstable_settings = {
 
 export default function RootLayoutNav() {
   const colorScheme = useColorScheme();
+  
   useEffect(() => {
     // Ocultar el splash screen de inmediato una vez que el RootLayout se monta
     SplashScreen.hideAsync();
@@ -32,3 +34,4 @@ export default function RootLayoutNav() {
     </ThemeProvider>
   );
 }
+

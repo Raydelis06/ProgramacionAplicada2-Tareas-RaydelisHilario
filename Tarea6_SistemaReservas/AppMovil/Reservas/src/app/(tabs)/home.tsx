@@ -11,6 +11,7 @@ import {
 } from "react-native";
 
 import { Colors } from "@/constants/theme";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
   eliminarServicio,
   obtenerServicios,
@@ -22,6 +23,7 @@ export default function TabTwoScreen() {
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState("");
   const router = useRouter();
+  const [esAdmin, setEsAdmin] = useState(false);
 
   const cargarServicios = useCallback(async () => {
     setCargando(true);
@@ -39,6 +41,17 @@ export default function TabTwoScreen() {
 
   useFocusEffect(
     useCallback(() => {
+      const verificarRolYCargar = async () => {
+        try {
+          await cargarServicios();
+          const rol = await AsyncStorage.getItem("rol");
+          setEsAdmin(rol === "admin");
+        } catch (error) {
+          console.error("Error al cargar datos:", error);
+        }
+      };
+
+      void verificarRolYCargar();
       void cargarServicios();
     }, [cargarServicios]),
   );
@@ -113,21 +126,23 @@ export default function TabTwoScreen() {
                 {item.duracion} minutos - ${item.precio}
               </Text>
             </View>
-            <View style={styles.accionesContainer}>
-              <TouchableOpacity
-                style={[styles.accionButton, styles.btnEditar]}
-                onPress={() => handleEditar(item)}
-              >
-                <Text style={styles.accionButtonText}>Editar</Text>
-              </TouchableOpacity>
+            {esAdmin && (
+              <View style={styles.accionesContainer}>
+                <TouchableOpacity
+                  style={[styles.accionButton, styles.btnEditar]}
+                  onPress={() => handleEditar(item)}
+                >
+                  <Text style={styles.accionButtonText}>Editar</Text>
+                </TouchableOpacity>
 
-              <TouchableOpacity
-                style={[styles.accionButton, styles.btnEliminar]}
-                onPress={() => handleEliminar(item.id)}
-              >
-                <Text style={styles.accionButtonText}>Eliminar</Text>
-              </TouchableOpacity>
-            </View>
+                <TouchableOpacity
+                  style={[styles.accionButton, styles.btnEliminar]}
+                  onPress={() => handleEliminar(item.id)}
+                >
+                  <Text style={styles.accionButtonText}>Eliminar</Text>
+                </TouchableOpacity>
+              </View>
+            )}
           </View>
         )}
       />

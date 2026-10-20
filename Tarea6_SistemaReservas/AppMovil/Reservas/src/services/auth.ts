@@ -1,5 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router } from "expo-router";
+import { jwtDecode } from "jwt-decode";
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
 
@@ -127,6 +128,12 @@ export async function iniciarSesion(email: string, password: string) {
 
   authToken = response.token;
   await AsyncStorage.setItem("userToken", authToken);
+
+  const { rol } = jwtDecode<{ rol?: string }>(authToken);
+  if (typeof rol !== "string" || !rol.trim()) {
+    throw new Error("El token de inicio de sesión no incluye un rol válido.");
+  }
+  await AsyncStorage.setItem("rol", rol);
 }
 
 export function registrarUsuario(
@@ -141,5 +148,6 @@ export function registrarUsuario(
 }
 
 export async function cerrarSesion() {
-  await AsyncStorage.removeItem("token");
+  await AsyncStorage.removeItem("userToken");
+  await AsyncStorage.removeItem("rol");
 }

@@ -1,13 +1,6 @@
 import { useFocusEffect, useRouter } from "expo-router";
 import { useCallback, useState } from "react";
-import {
-  FlatList,
-  Image,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { FlatList, Image, StyleSheet, Text, View } from "react-native";
 
 import { Colors } from "@/constants/theme";
 import { obtenerServicios, type Servicio } from "../../services/servicios";
@@ -40,20 +33,11 @@ export default function TabTwoScreen() {
 
   return (
     <View style={styles.container}>
-      {/* <TouchableOpacity style={styles.button} onPress={cerrarSesion()}>
-        <Text style={styles.buttonText}>Crear servicio</Text>
-      </TouchableOpacity> */}
       <Image
         source={require("../../../assets/images/logo_sublime.png")}
         style={styles.logo}
       />
       <Text style={styles.title}>Servicios</Text>
-      <TouchableOpacity
-        style={styles.button}
-        onPress={() => router.push("/(tabs)/crearServicio")}
-      >
-        <Text style={styles.buttonText}>Crear servicio</Text>
-      </TouchableOpacity>
 
       {!!error && <Text style={styles.error}>{error}</Text>}
       {cargando && <Text style={styles.message}>Cargando servicios...</Text>}
@@ -96,8 +80,9 @@ const styles = StyleSheet.create({
     color: Colors.light.principal,
   },
   logo: {
-    width: "20%",
-    height: "10%",
+    width: 80,
+    height: 80,
+    resizeMode: "contain",
     alignSelf: "flex-end",
   },
   button: {

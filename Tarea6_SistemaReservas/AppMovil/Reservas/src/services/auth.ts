@@ -1,5 +1,5 @@
-import { router} from "expo-router";
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { router } from "expo-router";
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
 
@@ -14,17 +14,17 @@ export type Servicio = {
 let authToken: string | null = null;
 
 function esValido(item: unknown): item is Record<string, unknown> {
-  return typeof item === 'object' && item !== null;
+  return typeof item === "object" && item !== null;
 }
 
 function getErrorMessage(body: unknown, fallback: string) {
-  if (typeof body === 'string' && body.trim()) {
+  if (typeof body === "string" && body.trim()) {
     return body;
   }
 
   if (esValido(body)) {
-    for (const key of ['message', 'detail', 'error']) {
-      if (typeof body[key] === 'string') {
+    for (const key of ["message", "detail", "error"]) {
+      if (typeof body[key] === "string") {
         return body[key];
       }
     }
@@ -33,29 +33,36 @@ function getErrorMessage(body: unknown, fallback: string) {
   return fallback;
 }
 
-async function request(
+export async function request(
   path: string,
   options: {
-    method?: 'GET' | 'POST' ;
+    method?: "GET" | "POST" | "PUT" | "DELETE";
     body?: Record<string, unknown>;
-    params?: Record<string, unknown>
+    params?: Record<string, unknown>;
     authenticated?: boolean;
   } = {},
 ): Promise<unknown> {
   if (!API_URL) {
-    throw new Error('Error al conectarse a la API');
+    throw new Error("Error al conectarse a la API");
   }
 
   const headers: Record<string, string> = {};
 
   if (options.body) {
-    headers['Content-Type'] = 'application/json';
+    headers["Content-Type"] = "application/json";
   }
 
   if (options.authenticated) {
+    console.log(
+      "request autenticado a:",
+      path,
+      "| token en memoria:",
+      !!authToken,
+    );
+    console.trace();
     if (!authToken) {
       try {
-        const tokenGuardado = await AsyncStorage.getItem('userToken');
+        const tokenGuardado = await AsyncStorage.getItem("userToken");
         if (tokenGuardado) {
           authToken = tokenGuardado;
         }
@@ -63,20 +70,20 @@ async function request(
         console.error("Error al leer el token", e);
       }
     }
-    console.log('request a:', path, '| authToken en memoria:', !!authToken);
-    
+    console.log("request a:", path, "| authToken en memoria:", !!authToken);
+
     if (!authToken) {
       authToken = null;
-      AsyncStorage.removeItem('userToken');
+      AsyncStorage.removeItem("userToken");
       router.replace("/");
-      alert('Su sesion expiró. Inicia sesión para consultar los servicios');
-      throw new Error('Sesión expirada');
+      alert("Su sesion expiró. Inicia sesión para consultar los servicios");
+      throw new Error("Sesión expirada");
     }
     headers.Authorization = `Bearer ${authToken}`;
   }
 
   const response = await fetch(`${API_URL}${path}`, {
-    method: options.method ?? 'GET',
+    method: options.method ?? "GET",
     headers,
     body: options.body ? JSON.stringify(options.body) : undefined,
   });
@@ -89,7 +96,7 @@ async function request(
       responseBody = JSON.parse(responseText) as unknown;
     } catch {
       if (response.ok) {
-        throw new Error('La API devolvió una respuesta no válida.');
+        throw new Error("La API devolvió una respuesta no válida.");
       }
       responseBody = responseText;
     }
@@ -105,21 +112,21 @@ async function request(
 }
 
 export async function iniciarSesion(email: string, password: string) {
-  const response = await request('/auth/login', {
-    method: 'POST',
+  const response = await request("/auth/login", {
+    method: "POST",
     body: { email, password },
   });
 
   if (
     !esValido(response) ||
-    typeof response.token !== 'string' ||
+    typeof response.token !== "string" ||
     !response.token.trim()
   ) {
-    throw new Error('La respuesta de inicio de sesión no incluye un token.');
+    throw new Error("La respuesta de inicio de sesión no incluye un token.");
   }
-  
+
   authToken = response.token;
-  await AsyncStorage.setItem('userToken', authToken);
+  await AsyncStorage.setItem("userToken", authToken);
 }
 
 export function registrarUsuario(
@@ -127,8 +134,8 @@ export function registrarUsuario(
   email: string,
   password: string,
 ) {
-  return request('/auth/registro', {
-    method: 'POST',
-    body: { nombre, email, password, rol: 'cliente' },
+  return request("/auth/registro", {
+    method: "POST",
+    body: { nombre, email, password, rol: "cliente" },
   });
 }

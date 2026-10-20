@@ -13,10 +13,10 @@ export default function AppTabs() {
       indicatorColor={colors.backgroundElement}
       labelStyle={{ selected: { color: colors.text } }}
     >
-      <NativeTabs.Trigger name="perfil">
-        <NativeTabs.Trigger.Label>Perfil</NativeTabs.Trigger.Label>
+      <NativeTabs.Trigger name="crearServicio">
+        <NativeTabs.Trigger.Label>Crear servicio</NativeTabs.Trigger.Label>
         <NativeTabs.Trigger.Icon
-          src={require("@/assets/images/tabIcons/user.png")}
+          src={require("@/assets/images/tabIcons/plus.png")}
           renderingMode="template"
         />
       </NativeTabs.Trigger>
@@ -27,10 +27,10 @@ export default function AppTabs() {
           renderingMode="template"
         />
       </NativeTabs.Trigger>
-      <NativeTabs.Trigger name="crearServicio">
-        <NativeTabs.Trigger.Label>Crear servicio</NativeTabs.Trigger.Label>
+      <NativeTabs.Trigger name="logout">
+        <NativeTabs.Trigger.Label>Salir</NativeTabs.Trigger.Label>
         <NativeTabs.Trigger.Icon
-          src={require("@/assets/images/tabIcons/plus.png")}
+          src={require("@/assets/images/tabIcons/logout.png")}
           renderingMode="template"
         />
       </NativeTabs.Trigger>

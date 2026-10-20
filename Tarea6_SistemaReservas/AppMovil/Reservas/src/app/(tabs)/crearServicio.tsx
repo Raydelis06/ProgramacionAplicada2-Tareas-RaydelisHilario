@@ -2,14 +2,14 @@ import { Colors } from "@/constants/theme";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
-    ActivityIndicator,
-    Alert,
-    Image,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
+  ActivityIndicator,
+  Alert,
+  Image,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
 } from "react-native";
 import { crearServicio } from "../../services/servicios";
 
@@ -47,7 +47,7 @@ export default function CrearServicioScreen() {
         duracionNumerica,
       );
       Alert.alert("Servicio creado", "El servicio se guardó correctamente.", [
-        { text: "Aceptar", onPress: () => router.back() },
+        { text: "Aceptar", onPress: () => router.replace("/(tabs)/home") },
       ]);
     } catch (error) {
       Alert.alert(

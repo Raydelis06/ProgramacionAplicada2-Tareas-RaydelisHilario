@@ -1,9 +1,21 @@
 import { useFocusEffect, useRouter } from "expo-router";
 import { useCallback, useState } from "react";
-import { FlatList, Image, StyleSheet, Text, View } from "react-native";
+import {
+  Alert,
+  FlatList,
+  Image,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 import { Colors } from "@/constants/theme";
-import { obtenerServicios, type Servicio } from "../../services/servicios";
+import {
+  eliminarServicio,
+  obtenerServicios,
+  type Servicio,
+} from "../../services/servicios";
 
 export default function TabTwoScreen() {
   const [servicios, setServicios] = useState<Servicio[]>([]);
@@ -31,6 +43,50 @@ export default function TabTwoScreen() {
     }, [cargarServicios]),
   );
 
+  function handleEditar(item: Servicio): void {
+    console.log("Boton editar pulsado: Id -> ", item.id);
+
+    router.push({
+      pathname: "/editarServicio",
+      params: {
+        servicioId: String(item.id),
+        nombre: item.nombre,
+        descripcion: item.descripcion,
+        precio: String(item.precio),
+        duracion: String(item.duracion),
+      },
+    });
+  }
+
+  function handleEliminar(id: number): void {
+    Alert.alert(
+      "Eliminar servicio",
+      "¿Seguro que quieres eliminar el servicio?",
+      [
+        {
+          text: "Cancelar",
+          style: "cancel",
+        },
+        {
+          text: "Eliminar",
+          style: "destructive",
+          onPress: async () => {
+            await eliminarServicio(id);
+            await cargarServicios();
+            Alert.alert(
+              "Servicio eliminado",
+              "El servicio ha sido eliminado correctamente.",
+            );
+          },
+        },
+      ],
+      {
+        cancelable: true,
+        onDismiss: () => router.navigate("/home"), // Android: tocar fuera del diálogo
+      },
+    );
+  }
+
   return (
     <View style={styles.container}>
       <Image
@@ -56,6 +112,21 @@ export default function TabTwoScreen() {
               <Text style={styles.servicioDetailText}>
                 {item.duracion} minutos - ${item.precio}
               </Text>
+            </View>
+            <View style={styles.accionesContainer}>
+              <TouchableOpacity
+                style={[styles.accionButton, styles.btnEditar]}
+                onPress={() => handleEditar(item)}
+              >
+                <Text style={styles.accionButtonText}>Editar</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[styles.accionButton, styles.btnEliminar]}
+                onPress={() => handleEliminar(item.id)}
+              >
+                <Text style={styles.accionButtonText}>Eliminar</Text>
+              </TouchableOpacity>
             </View>
           </View>
         )}
@@ -86,20 +157,6 @@ const styles = StyleSheet.create({
     resizeMode: "contain",
     alignSelf: "flex-end",
   },
-  button: {
-    marginTop: 8,
-    marginBottom: 16,
-    backgroundColor: Colors.light.principal,
-    height: 46,
-    borderRadius: 10,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  buttonText: {
-    color: Colors.light.light_color,
-    fontSize: 16,
-    fontWeight: "600",
-  },
   message: {
     color: "#a7a7a7",
     marginBottom: 12,
@@ -125,5 +182,31 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "#a7a7a7",
     padding: 5,
+  },
+  accionesContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    borderTopWidth: 1,
+    borderTopColor: "#eee",
+  },
+  accionButton: {
+    flex: 1,
+    height: 38,
+    borderRadius: 8,
+    alignItems: "center",
+    justifyContent: "center",
+    marginHorizontal: 4,
+    marginBottom: 35,
+  },
+  btnEditar: {
+    backgroundColor: Colors.light.principal,
+  },
+  btnEliminar: {
+    backgroundColor: Colors.light.error || "#ff5252",
+  },
+  accionButtonText: {
+    color: "#fff",
+    fontSize: 14,
+    fontWeight: "600",
   },
 });

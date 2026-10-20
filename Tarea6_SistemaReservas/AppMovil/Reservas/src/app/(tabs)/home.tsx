@@ -1,6 +1,7 @@
 import { useFocusEffect, useRouter } from "expo-router";
 import { useCallback, useState } from "react";
 import {
+  Alert,
   FlatList,
   Image,
   StyleSheet,
@@ -10,7 +11,11 @@ import {
 } from "react-native";
 
 import { Colors } from "@/constants/theme";
-import { obtenerServicios, type Servicio } from "../../services/servicios";
+import {
+  eliminarServicio,
+  obtenerServicios,
+  type Servicio,
+} from "../../services/servicios";
 
 export default function TabTwoScreen() {
   const [servicios, setServicios] = useState<Servicio[]>([]);
@@ -38,22 +43,57 @@ export default function TabTwoScreen() {
     }, [cargarServicios]),
   );
 
+  function handleEditar(item: Servicio): void {
+    console.log("Boton editar pulsado: Id -> ", item.id);
+
+    router.push({
+      pathname: "/editarServicio",
+      params: {
+        servicioId: String(item.id),
+        nombre: item.nombre,
+        descripcion: item.descripcion,
+        precio: String(item.precio),
+        duracion: String(item.duracion),
+      },
+    });
+  }
+
+  function handleEliminar(id: number): void {
+    Alert.alert(
+      "Eliminar servicio",
+      "¿Seguro que quieres eliminar el servicio?",
+      [
+        {
+          text: "Cancelar",
+          style: "cancel",
+        },
+        {
+          text: "Eliminar",
+          style: "destructive",
+          onPress: async () => {
+            await eliminarServicio(id);
+            await cargarServicios();
+            Alert.alert(
+              "Servicio eliminado",
+              "El servicio ha sido eliminado correctamente.",
+            );
+          },
+        },
+      ],
+      {
+        cancelable: true,
+        onDismiss: () => router.navigate("/home"), // Android: tocar fuera del diálogo
+      },
+    );
+  }
+
   return (
     <View style={styles.container}>
-      {/* <TouchableOpacity style={styles.button} onPress={cerrarSesion()}>
-        <Text style={styles.buttonText}>Crear servicio</Text>
-      </TouchableOpacity> */}
       <Image
         source={require("../../../assets/images/logo_sublime.png")}
         style={styles.logo}
       />
       <Text style={styles.title}>Servicios</Text>
-      <TouchableOpacity
-        style={styles.button}
-        onPress={() => router.push("/(tabs)/crearServicio")}
-      >
-        <Text style={styles.buttonText}>Crear servicio</Text>
-      </TouchableOpacity>
 
       {!!error && <Text style={styles.error}>{error}</Text>}
       {cargando && <Text style={styles.message}>Cargando servicios...</Text>}
@@ -68,10 +108,25 @@ export default function TabTwoScreen() {
           <View style={styles.containerHorizontal}>
             <View style={styles.servicio}>
               <Text style={styles.servicioText}>{item.nombre}</Text>
+              <Text style={styles.servicioDetailText}>{item.descripcion}</Text>
               <Text style={styles.servicioDetailText}>
-                {new Date(item.descripcion).toLocaleDateString()}
-                {" · "}
+                {item.duracion} minutos - ${item.precio}
               </Text>
+            </View>
+            <View style={styles.accionesContainer}>
+              <TouchableOpacity
+                style={[styles.accionButton, styles.btnEditar]}
+                onPress={() => handleEditar(item)}
+              >
+                <Text style={styles.accionButtonText}>Editar</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[styles.accionButton, styles.btnEliminar]}
+                onPress={() => handleEliminar(item.id)}
+              >
+                <Text style={styles.accionButtonText}>Eliminar</Text>
+              </TouchableOpacity>
             </View>
           </View>
         )}
@@ -85,6 +140,7 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 24,
     paddingTop: 24,
+    backgroundColor: Colors.light.light_color,
   },
   containerHorizontal: {
     flex: 1,
@@ -96,23 +152,10 @@ const styles = StyleSheet.create({
     color: Colors.light.principal,
   },
   logo: {
-    width: "20%",
-    height: "10%",
+    width: 80,
+    height: 80,
+    resizeMode: "contain",
     alignSelf: "flex-end",
-  },
-  button: {
-    marginTop: 8,
-    marginBottom: 16,
-    backgroundColor: Colors.light.principal,
-    height: 46,
-    borderRadius: 10,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  buttonText: {
-    color: Colors.light.light_color,
-    fontSize: 16,
-    fontWeight: "600",
   },
   message: {
     color: "#a7a7a7",
@@ -123,7 +166,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   servicio: {
-    backgroundColor: "#ffffff33",
+    backgroundColor: "#fbfbfb",
     padding: 15,
     borderRadius: 8,
     marginBottom: 10,
@@ -131,12 +174,39 @@ const styles = StyleSheet.create({
   },
   servicioText: {
     fontSize: 16,
-    color: "white",
+    color: Colors.light.secondary,
     padding: 5,
+    fontWeight: "bold",
   },
   servicioDetailText: {
     fontSize: 16,
     color: "#a7a7a7",
     padding: 5,
+  },
+  accionesContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    borderTopWidth: 1,
+    borderTopColor: "#eee",
+  },
+  accionButton: {
+    flex: 1,
+    height: 38,
+    borderRadius: 8,
+    alignItems: "center",
+    justifyContent: "center",
+    marginHorizontal: 4,
+    marginBottom: 35,
+  },
+  btnEditar: {
+    backgroundColor: Colors.light.principal,
+  },
+  btnEliminar: {
+    backgroundColor: Colors.light.error || "#ff5252",
+  },
+  accionButtonText: {
+    color: "#fff",
+    fontSize: 14,
+    fontWeight: "600",
   },
 });

@@ -139,3 +139,7 @@ export function registrarUsuario(
     body: { nombre, email, password, rol: "cliente" },
   });
 }
+
+export async function cerrarSesion() {
+  await AsyncStorage.removeItem("token");
+}

@@ -52,9 +52,9 @@ export default function TabTwoScreen() {
           <View style={styles.containerHorizontal}>
             <View style={styles.servicio}>
               <Text style={styles.servicioText}>{item.nombre}</Text>
+              <Text style={styles.servicioDetailText}>{item.descripcion}</Text>
               <Text style={styles.servicioDetailText}>
-                {new Date(item.descripcion).toLocaleDateString()}
-                {" · "}
+                {item.duracion} minutos - ${item.precio}
               </Text>
             </View>
           </View>
@@ -69,6 +69,7 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 24,
     paddingTop: 24,
+    backgroundColor: Colors.light.light_color,
   },
   containerHorizontal: {
     flex: 1,
@@ -108,7 +109,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   servicio: {
-    backgroundColor: "#ffffff33",
+    backgroundColor: "#fbfbfb",
     padding: 15,
     borderRadius: 8,
     marginBottom: 10,
@@ -116,8 +117,9 @@ const styles = StyleSheet.create({
   },
   servicioText: {
     fontSize: 16,
-    color: "white",
+    color: Colors.light.secondary,
     padding: 5,
+    fontWeight: "bold",
   },
   servicioDetailText: {
     fontSize: 16,

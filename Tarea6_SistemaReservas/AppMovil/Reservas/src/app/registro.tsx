@@ -23,7 +23,7 @@ export default function registroScreen() {
     setError('');
     try {
       await registrar(nombre, email.trim(), password);
-      router.push('/home');
+      router.push('/');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'No se pudo completar el registro.');
     } finally {

@@ -12,11 +12,12 @@ import {
 
 import { Colors } from "@/constants/theme";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import React from "react";
 import {
   eliminarServicio,
   obtenerServicios,
   type Servicio,
-} from "../../services/servicios";
+} from "../../../services/servicios";
 
 export default function TabTwoScreen() {
   const [servicios, setServicios] = useState<Servicio[]>([]);
@@ -95,7 +96,7 @@ export default function TabTwoScreen() {
       ],
       {
         cancelable: true,
-        onDismiss: () => router.navigate("/home"), // Android: tocar fuera del diálogo
+        onDismiss: () => router.navigate("/servicios/home"), // Android: tocar fuera del diálogo
       },
     );
   }
@@ -103,7 +104,7 @@ export default function TabTwoScreen() {
   return (
     <View style={styles.container}>
       <Image
-        source={require("../../../assets/images/logo_sublime.png")}
+        source={require("@/assets/images/logo_sublime.png")}
         style={styles.logo}
       />
       <Text style={styles.title}>Servicios</Text>

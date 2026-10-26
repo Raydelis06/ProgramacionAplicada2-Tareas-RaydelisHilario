@@ -15,7 +15,7 @@ export default function TabLogOut() {
           {
             text: "Cancelar",
             style: "cancel",
-            onPress: () => router.navigate("/home"), // vuelve a una pestaña normal
+            onPress: () => router.navigate("/servicios/home"), // vuelve a una pestaña normal
           },
           {
             text: "Salir",
@@ -28,7 +28,7 @@ export default function TabLogOut() {
         ],
         {
           cancelable: true,
-          onDismiss: () => router.navigate("/home"), // Android: tocar fuera del diálogo
+          onDismiss: () => router.navigate("/servicios/home"), // Android: tocar fuera del diálogo
         },
       );
     }, [router]),

@@ -1,6 +1,6 @@
 import { Colors } from "@/constants/theme";
 import { useRouter } from "expo-router";
-import { useState } from "react";
+import React, { useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -11,7 +11,7 @@ import {
   TextInput,
   TouchableOpacity,
 } from "react-native";
-import { crearServicio } from "../../services/servicios";
+import { crearServicio } from "../../../services/servicios";
 
 export default function CrearServicioScreen() {
   const router = useRouter();
@@ -47,7 +47,10 @@ export default function CrearServicioScreen() {
         precioNumerico,
       );
       Alert.alert("Servicio creado", "El servicio se guardó correctamente.", [
-        { text: "Aceptar", onPress: () => router.replace("/(tabs)/home") },
+        {
+          text: "Aceptar",
+          onPress: () => router.replace("/(tabs)/servicios/home"),
+        },
       ]);
     } catch (error) {
       Alert.alert(
@@ -64,7 +67,7 @@ export default function CrearServicioScreen() {
   return (
     <ScrollView style={styles.container}>
       <Image
-        source={require("../../../assets/images/logo_sublime.png")}
+        source={require("@/assets/images/logo_sublime.png")}
         style={styles.logo}
       />
       <Text style={styles.title}>Crear servicio</Text>

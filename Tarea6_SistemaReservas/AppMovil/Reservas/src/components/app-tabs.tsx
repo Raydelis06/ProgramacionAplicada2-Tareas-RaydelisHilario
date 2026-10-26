@@ -4,7 +4,7 @@ import { useColorScheme } from "react-native";
 import { Colors } from "@/constants/theme";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useFocusEffect } from "expo-router";
-import { useCallback, useState } from "react";
+import React, { useCallback, useState } from "react";
 
 export default function AppTabs() {
   const scheme = useColorScheme();
@@ -33,7 +33,7 @@ export default function AppTabs() {
       labelStyle={{ selected: { color: colors.text } }}
     >
       {esAdmin && (
-        <NativeTabs.Trigger name="crearServicio">
+        <NativeTabs.Trigger name="servicios/crearServicio">
           <NativeTabs.Trigger.Label>Crear servicio</NativeTabs.Trigger.Label>
           <NativeTabs.Trigger.Icon
             src={require("@/assets/images/tabIcons/plus.png")}
@@ -42,10 +42,17 @@ export default function AppTabs() {
         </NativeTabs.Trigger>
       )}
 
-      <NativeTabs.Trigger name="home">
+      <NativeTabs.Trigger name="servicios/home">
         <NativeTabs.Trigger.Label>Home</NativeTabs.Trigger.Label>
         <NativeTabs.Trigger.Icon
           src={require("@/assets/images/tabIcons/home.png")}
+          renderingMode="template"
+        />
+      </NativeTabs.Trigger>
+      <NativeTabs.Trigger name="reservas/reservas">
+        <NativeTabs.Trigger.Label>Reservas</NativeTabs.Trigger.Label>
+        <NativeTabs.Trigger.Icon
+          src={require("@/assets/images/tabIcons/calendar.png")}
           renderingMode="template"
         />
       </NativeTabs.Trigger>

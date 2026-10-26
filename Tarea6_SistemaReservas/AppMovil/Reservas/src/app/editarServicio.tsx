@@ -1,6 +1,6 @@
 import { Colors } from "@/constants/theme";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useState } from "react";
+import React, { useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -84,7 +84,12 @@ export default function CrearServicioScreen() {
         editando
           ? "Los cambios se guardaron correctamente."
           : "El servicio se guardó correctamente.",
-        [{ text: "Aceptar", onPress: () => router.replace("/(tabs)/home") }],
+        [
+          {
+            text: "Aceptar",
+            onPress: () => router.replace("/(tabs)/servicios/home"),
+          },
+        ],
       );
     } catch (error) {
       Alert.alert(

@@ -1,7 +1,6 @@
 import { useFocusEffect, useRouter } from "expo-router";
 import { useCallback, useState } from "react";
 import {
-  Alert,
   FlatList,
   Image,
   StyleSheet,
@@ -13,11 +12,7 @@ import {
 import { Colors } from "@/constants/theme";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import React from "react";
-import {
-  eliminarServicio,
-  obtenerServicios,
-  type Servicio,
-} from "../../../services/servicios";
+import { obtenerServicios, type Servicio } from "../../../services/servicios";
 
 export default function TabTwoScreen() {
   const [servicios, setServicios] = useState<Servicio[]>([]);
@@ -57,63 +52,23 @@ export default function TabTwoScreen() {
     }, [cargarServicios]),
   );
 
-  function handleEditar(item: Servicio): void {
-    console.log("Boton editar pulsado: Id -> ", item.id);
-
-    router.push({
-      pathname: "/servicios/editarServicio",
-      params: {
-        servicioId: String(item.id),
-        nombre: item.nombre,
-        descripcion: item.descripcion,
-        precio: String(item.precio),
-        duracion: String(item.duracion),
-      },
-    });
-  }
-
-  function handleEliminar(id: number): void {
-    Alert.alert(
-      "Eliminar servicio",
-      "¿Seguro que quieres eliminar el servicio?",
-      [
-        {
-          text: "Cancelar",
-          style: "cancel",
-        },
-        {
-          text: "Eliminar",
-          style: "destructive",
-          onPress: async () => {
-            await eliminarServicio(id);
-            await cargarServicios();
-            Alert.alert(
-              "Servicio eliminado",
-              "El servicio ha sido eliminado correctamente.",
-            );
-          },
-        },
-      ],
-      {
-        cancelable: true,
-        onDismiss: () => router.navigate("/servicios/home"), // Android: tocar fuera del diálogo
-      },
-    );
-  }
-
   function handleVerDetalle(item: Servicio): void {
     console.log("Ver detalle servicio: ", item.nombre);
 
     router.push({
       pathname: "/servicios/[id]",
       params: {
-        servicioId: String(item.id),
+        id: String(item.id),
         nombre: item.nombre,
         descripcion: item.descripcion,
         precio: String(item.precio),
         duracion: String(item.duracion),
       },
     });
+  }
+
+  function handleCrear(): void {
+    router.push("/(tabs)/servicios/crearServicio");
   }
 
   return (
@@ -123,6 +78,17 @@ export default function TabTwoScreen() {
         style={styles.logo}
       />
       <Text style={styles.title}>Servicios</Text>
+
+      {esAdmin && (
+        <View style={styles.accionesContainer}>
+          <TouchableOpacity
+            style={[styles.accionButton, styles.btnPrincipal]}
+            onPress={() => handleCrear()}
+          >
+            <Text style={styles.accionButtonText}>Crear servicio</Text>
+          </TouchableOpacity>
+        </View>
+      )}
 
       {!!error && <Text style={styles.error}>{error}</Text>}
       {cargando && <Text style={styles.message}>Cargando servicios...</Text>}

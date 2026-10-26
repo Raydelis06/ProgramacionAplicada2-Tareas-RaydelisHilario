@@ -61,7 +61,7 @@ export default function TabTwoScreen() {
     console.log("Boton editar pulsado: Id -> ", item.id);
 
     router.push({
-      pathname: "/editarServicio",
+      pathname: "/servicios/editarServicio",
       params: {
         servicioId: String(item.id),
         nombre: item.nombre,
@@ -101,6 +101,21 @@ export default function TabTwoScreen() {
     );
   }
 
+  function handleVerDetalle(item: Servicio): void {
+    console.log("Ver detalle servicio: ", item.nombre);
+
+    router.push({
+      pathname: "/servicios/[id]",
+      params: {
+        servicioId: String(item.id),
+        nombre: item.nombre,
+        descripcion: item.descripcion,
+        precio: String(item.precio),
+        duracion: String(item.duracion),
+      },
+    });
+  }
+
   return (
     <View style={styles.container}>
       <Image
@@ -120,30 +135,17 @@ export default function TabTwoScreen() {
         keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => (
           <View style={styles.containerHorizontal}>
-            <View style={styles.servicio}>
-              <Text style={styles.servicioText}>{item.nombre}</Text>
-              <Text style={styles.servicioDetailText}>{item.descripcion}</Text>
-              <Text style={styles.servicioDetailText}>
-                {item.duracion} minutos - ${item.precio}
-              </Text>
-            </View>
-            {esAdmin && (
-              <View style={styles.accionesContainer}>
-                <TouchableOpacity
-                  style={[styles.accionButton, styles.btnEditar]}
-                  onPress={() => handleEditar(item)}
-                >
-                  <Text style={styles.accionButtonText}>Editar</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  style={[styles.accionButton, styles.btnEliminar]}
-                  onPress={() => handleEliminar(item.id)}
-                >
-                  <Text style={styles.accionButtonText}>Eliminar</Text>
-                </TouchableOpacity>
+            <TouchableOpacity onPress={() => handleVerDetalle(item)}>
+              <View style={styles.servicio}>
+                <Text style={styles.servicioText}>{item.nombre}</Text>
+                <Text style={styles.servicioDetailText}>
+                  {item.descripcion}
+                </Text>
+                <Text style={styles.servicioDetailText}>
+                  {item.duracion} minutos - ${item.precio}
+                </Text>
               </View>
-            )}
+            </TouchableOpacity>
           </View>
         )}
       />
@@ -214,7 +216,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 4,
     marginBottom: 35,
   },
-  btnEditar: {
+  btnPrincipal: {
     backgroundColor: Colors.light.principal,
   },
   btnEliminar: {

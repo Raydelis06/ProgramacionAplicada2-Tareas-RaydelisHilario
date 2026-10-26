@@ -77,8 +77,18 @@ export default function TabTwoScreen() {
         source={require("@/assets/images/logo_sublime.png")}
         style={styles.logo}
       />
-      <Text style={styles.title}>Servicios</Text>
-
+      <Text style={styles.title}>Bienvenido/a!</Text>
+      {esAdmin && (
+        <Text style={styles.subtitle}>
+          Has iniciado sesion como administrador, consulta, crea o modifica
+          servicios y reservas.
+        </Text>
+      )}
+      {!esAdmin && (
+        <Text style={styles.subtitle}>
+          Consulta nuestros servicios y reserva al instante.
+        </Text>
+      )}
       {esAdmin && (
         <View style={styles.accionesContainer}>
           <TouchableOpacity
@@ -134,6 +144,12 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     marginBottom: 24,
     color: Colors.light.principal,
+  },
+  subtitle: {
+    color: "#667085",
+    fontSize: 15,
+    lineHeight: 22,
+    marginBottom: 28,
   },
   logo: {
     width: 80,

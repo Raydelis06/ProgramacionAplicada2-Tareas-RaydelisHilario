@@ -11,7 +11,7 @@ import {
   TextInput,
   TouchableOpacity,
 } from "react-native";
-import { actualizarServicio, crearServicio } from "../../../services/servicios";
+import { actualizarServicio } from "../../../services/servicios";
 
 export default function CrearServicioScreen() {
   const router = useRouter();
@@ -34,8 +34,6 @@ export default function CrearServicioScreen() {
   const [duracion, setDuracion] = useState(duracionInicial ?? "");
   const [guardando, setGuardando] = useState(false);
 
-  const editando = servicioId !== undefined;
-
   const guardarServicio = async () => {
     const precioNumerico = Number(precio.replace(",", "."));
     const duracionNumerica = Number(duracion);
@@ -55,35 +53,21 @@ export default function CrearServicioScreen() {
 
     try {
       setGuardando(true);
-      if (editando) {
-        const idNumerico = Number(servicioId);
-        if (!Number.isInteger(idNumerico) || idNumerico <= 0) {
-          Alert.alert(
-            "Servicio inválido",
-            "No se pudo identificar el servicio.",
-          );
-          return;
-        }
-        await actualizarServicio(
-          idNumerico,
-          nombre.trim(),
-          descripcion.trim(),
-          duracionNumerica,
-          precioNumerico,
-        );
-      } else {
-        await crearServicio(
-          nombre.trim(),
-          descripcion.trim(),
-          duracionNumerica,
-          precioNumerico,
-        );
+      const idNumerico = Number(servicioId);
+      if (!Number.isInteger(idNumerico) || idNumerico <= 0) {
+        Alert.alert("Servicio inválido", "No se pudo identificar el servicio.");
+        return;
       }
+      await actualizarServicio(
+        idNumerico,
+        nombre.trim(),
+        descripcion.trim(),
+        duracionNumerica,
+        precioNumerico,
+      );
       Alert.alert(
-        editando ? "Servicio actualizado" : "Servicio creado",
-        editando
-          ? "Los cambios se guardaron correctamente."
-          : "El servicio se guardó correctamente.",
+        "Servicio actualizado",
+        "Los cambios se guardaron correctamente.",
         [
           {
             text: "Aceptar",
@@ -96,9 +80,7 @@ export default function CrearServicioScreen() {
         "Error",
         error instanceof Error
           ? error.message
-          : editando
-            ? "No se pudo actualizar el servicio."
-            : "No se pudo crear el servicio.",
+          : "No se pudo actualizar el servicio.",
       );
     } finally {
       setGuardando(false);
@@ -111,13 +93,9 @@ export default function CrearServicioScreen() {
         source={require("../../../../assets/images/logo_sublime.png")}
         style={styles.logo}
       />
-      <Text style={styles.title}>
-        {editando ? "Editar servicio" : "Crear servicio"}
-      </Text>
+      <Text style={styles.title}>Editar servicio</Text>
       <Text style={styles.subtitle}>
-        {editando
-          ? "Actualiza la información del servicio."
-          : "Completa la información del servicio."}
+        Actualiza la información del servicio.
       </Text>
       <Text style={styles.label}>Nombre</Text>
       <TextInput
@@ -170,9 +148,7 @@ export default function CrearServicioScreen() {
         {guardando ? (
           <ActivityIndicator color="#fff" />
         ) : (
-          <Text style={styles.buttonText}>
-            {editando ? "Actualizar servicio" : "Guardar servicio"}
-          </Text>
+          <Text style={styles.buttonText}>Actualizar servicio</Text>
         )}
       </TouchableOpacity>
       <Text></Text>

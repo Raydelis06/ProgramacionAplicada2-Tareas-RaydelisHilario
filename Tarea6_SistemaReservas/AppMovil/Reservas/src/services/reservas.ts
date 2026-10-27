@@ -1,3 +1,4 @@
+import { Alert } from "react-native";
 import { request } from "./auth";
 
 export type Reserva = {
@@ -24,6 +25,15 @@ export type Reserva = {
 function esValido(item: unknown): item is Record<string, unknown> {
   return typeof item === "object" && item !== null;
 }
+
+export const combinarFechaHora = (fecha: Date, hora: Date): Date => {
+  const resultado = new Date(fecha);
+  resultado.setHours(hora.getHours(), hora.getMinutes(), 0, 0);
+  return resultado;
+};
+
+export const esFechaHoraFutura = (fecha: Date, hora: Date): boolean =>
+  combinarFechaHora(fecha, hora).getTime() > Date.now();
 
 export async function obtenerTodasLasReservas(): Promise<Reserva[]> {
   const response = await request("/reservas", { authenticated: true });
@@ -142,17 +152,23 @@ export function crearReserva(data: {
   usuarioId: number;
   estado?: string;
 }) {
-  return request("/reservas", {
-    method: "POST",
-    body: {
-      fecha: data.fecha,
-      hora: data.hora,
-      servicioId: Number(data.servicioId),
-      usuarioId: Number(data.usuarioId),
-      estado: data.estado || "pendiente",
-    },
-    authenticated: true,
-  });
+  const fechaHora = new Date(`${data.fecha}T${data.hora}`);
+  if (fechaHora.getTime() <= Date.now()) {
+    Alert.alert("Error", "La fecha y hora deben ser futuras");
+    return;
+  } else {
+    return request("/reservas", {
+      method: "POST",
+      body: {
+        fecha: data.fecha,
+        hora: data.hora,
+        servicioId: Number(data.servicioId),
+        usuarioId: Number(data.usuarioId),
+        estado: data.estado || "pendiente",
+      },
+      authenticated: true,
+    });
+  }
 }
 
 export function actualizarEstadoReserva(

@@ -1,23 +1,23 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useCallback, useState } from "react";
 import {
-    ActivityIndicator,
-    Alert,
-    Image,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Alert,
+  Image,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 
 import { Colors } from "@/constants/theme";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import React from "react";
 import {
-    eliminarServicio,
-    obtenerServicios,
-    type Servicio,
+  eliminarServicio,
+  obtenerServicios,
+  type Servicio,
 } from "../../../services/servicios";
 
 export default function DetalleServicioScreen() {
@@ -100,6 +100,16 @@ export default function DetalleServicioScreen() {
     );
   }
 
+  function handleReservar(): void {
+    if (!servicio) return;
+    router.push({
+      pathname: "/reservas/nueva",
+      params: {
+        servicioId: String(servicio.id),
+      },
+    });
+  }
+
   return (
     <ScrollView style={styles.container}>
       <Image
@@ -131,14 +141,14 @@ export default function DetalleServicioScreen() {
             <View style={styles.accionesContainer}>
               <TouchableOpacity
                 style={[styles.accionButton, styles.btnEditar]}
-                onPress={handleEditar}
+                onPress={() => handleEditar()}
               >
                 <Text style={styles.accionButtonText}>Editar</Text>
               </TouchableOpacity>
 
               <TouchableOpacity
                 style={[styles.accionButton, styles.btnEliminar]}
-                onPress={handleEliminar}
+                onPress={() => handleEliminar()}
               >
                 <Text style={styles.accionButtonText}>Eliminar</Text>
               </TouchableOpacity>
@@ -148,7 +158,7 @@ export default function DetalleServicioScreen() {
             <View style={styles.accionesContainer}>
               <TouchableOpacity
                 style={[styles.accionButton, styles.btnEditar]}
-                onPress={handleEditar}
+                onPress={() => handleReservar()}
               >
                 <Text style={styles.accionButtonText}>Reservar</Text>
               </TouchableOpacity>

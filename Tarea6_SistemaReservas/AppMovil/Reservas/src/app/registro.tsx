@@ -1,31 +1,43 @@
-import { useState } from 'react';
-import { StyleSheet, TextInput, TouchableOpacity, View, Text, Image } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useRouter } from "expo-router";
+import { useState } from "react";
+import {
+  Image,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
-import { registrarUsuario } from '../services/auth';
-import { Colors } from '@/constants/theme';
+import { Colors } from "@/constants/theme";
+import React from "react";
+import { registrarUsuario } from "../services/auth";
 
 export default function registroScreen() {
-  const [email, setEmail] = useState('');
-  const [nombre, setNombre] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [nombre, setNombre] = useState("");
+  const [password, setPassword] = useState("");
   const [cargando, setCargando] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const router = useRouter();
 
   const handleRegistrarse = async () => {
     if (!email.trim() || !password) {
-      setError('Todos los campos son requeridos');
+      setError("Todos los campos son requeridos");
       return;
     }
 
     setCargando(true);
-    setError('');
+    setError("");
     try {
       await registrarUsuario(nombre, email.trim(), password);
-      router.push('/');
+      router.push("/");
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'No se pudo completar el registro.');
+      setError(
+        err instanceof Error
+          ? err.message
+          : "No se pudo completar el registro.",
+      );
     } finally {
       setCargando(false);
     }
@@ -37,11 +49,14 @@ export default function registroScreen() {
 
   return (
     <View style={styles.container}>
-      <Image source={require('../../assets/images/logo_sublime.png')} style={styles.logo} />
+      <Image
+        source={require("../../assets/images/logo_sublime.png")}
+        style={styles.logo}
+      />
 
       <Text style={styles.title}>Registro</Text>
 
-        <Text style={styles.label}>Nombre</Text>
+      <Text style={styles.label}>Nombre</Text>
       <TextInput
         style={styles.input}
         value={nombre}
@@ -82,7 +97,7 @@ export default function registroScreen() {
         disabled={cargando}
       >
         <Text style={styles.buttonText}>
-          {cargando ? 'Registrando...' : 'Registrarse'}
+          {cargando ? "Registrando..." : "Registrarse"}
         </Text>
       </TouchableOpacity>
       <TouchableOpacity style={styles.link} onPress={irLogin}>
@@ -95,49 +110,49 @@ export default function registroScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
+    justifyContent: "center",
     paddingHorizontal: 24,
   },
   title: {
     fontSize: 28,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginBottom: 24,
     color: Colors.light.principal,
   },
   logo: {
-    width: '80%', 
-    height: '20%',
-    alignSelf: 'center',
-    marginBottom: 50
+    width: "80%",
+    height: "20%",
+    alignSelf: "center",
+    marginBottom: 50,
   },
   label: {
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: "600",
     marginBottom: 8,
     color: Colors.light.secondary,
   },
   input: {
     height: 46,
     borderWidth: 1,
-    borderColor: '#ffffff8d',
+    borderColor: "#ffffff8d",
     borderRadius: 10,
     paddingHorizontal: 12,
     marginBottom: 16,
-    backgroundColor: '#ffffff33',
-    color: Colors.light.secondary
+    backgroundColor: "#ffffff33",
+    color: Colors.light.secondary,
   },
   button: {
     marginTop: 8,
     backgroundColor: Colors.light.principal,
     height: 46,
     borderRadius: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   buttonText: {
     color: Colors.light.light_color,
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   buttonDisabled: {
     opacity: 0.6,
@@ -150,6 +165,6 @@ const styles = StyleSheet.create({
     marginTop: 16,
     color: Colors.light.placeholder,
     fontSize: 14,
-    textAlign: 'center',
+    textAlign: "center",
   },
 });

@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import "react-native-reanimated";
 
 import { useColorScheme } from "@/hooks/use-color-scheme";
+import React from "react";
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -38,7 +39,6 @@ export default function RootLayoutNav() {
         <Stack.Screen name="index" options={{ headerShown: false }} />
         <Stack.Screen name="registro" options={{ headerShown: false }} />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="editarServicio" options={{ headerShown: false }} />
       </Stack>
     </ThemeProvider>
   );

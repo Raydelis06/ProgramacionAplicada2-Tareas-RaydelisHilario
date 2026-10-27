@@ -1,7 +1,6 @@
 import { useFocusEffect, useRouter } from "expo-router";
 import { useCallback, useState } from "react";
 import {
-  Alert,
   FlatList,
   Image,
   StyleSheet,
@@ -12,11 +11,8 @@ import {
 
 import { Colors } from "@/constants/theme";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import {
-  eliminarServicio,
-  obtenerServicios,
-  type Servicio,
-} from "../../services/servicios";
+import React from "react";
+import { obtenerServicios, type Servicio } from "../../../services/servicios";
 
 export default function TabTwoScreen() {
   const [servicios, setServicios] = useState<Servicio[]>([]);
@@ -56,13 +52,13 @@ export default function TabTwoScreen() {
     }, [cargarServicios]),
   );
 
-  function handleEditar(item: Servicio): void {
-    console.log("Boton editar pulsado: Id -> ", item.id);
+  function handleVerDetalle(item: Servicio): void {
+    console.log("Ver detalle servicio: ", item.nombre);
 
     router.push({
-      pathname: "/editarServicio",
+      pathname: "/servicios/[id]",
       params: {
-        servicioId: String(item.id),
+        id: String(item.id),
         nombre: item.nombre,
         descripcion: item.descripcion,
         precio: String(item.precio),
@@ -71,42 +67,38 @@ export default function TabTwoScreen() {
     });
   }
 
-  function handleEliminar(id: number): void {
-    Alert.alert(
-      "Eliminar servicio",
-      "¿Seguro que quieres eliminar el servicio?",
-      [
-        {
-          text: "Cancelar",
-          style: "cancel",
-        },
-        {
-          text: "Eliminar",
-          style: "destructive",
-          onPress: async () => {
-            await eliminarServicio(id);
-            await cargarServicios();
-            Alert.alert(
-              "Servicio eliminado",
-              "El servicio ha sido eliminado correctamente.",
-            );
-          },
-        },
-      ],
-      {
-        cancelable: true,
-        onDismiss: () => router.navigate("/home"), // Android: tocar fuera del diálogo
-      },
-    );
+  function handleCrear(): void {
+    router.push("/(tabs)/servicios/crearServicio");
   }
 
   return (
     <View style={styles.container}>
       <Image
-        source={require("../../../assets/images/logo_sublime.png")}
+        source={require("@/assets/images/logo_sublime.png")}
         style={styles.logo}
       />
-      <Text style={styles.title}>Servicios</Text>
+      <Text style={styles.title}>Bienvenido/a!</Text>
+      {esAdmin && (
+        <Text style={styles.subtitle}>
+          Has iniciado sesion como administrador, consulta, crea o modifica
+          servicios y reservas.
+        </Text>
+      )}
+      {!esAdmin && (
+        <Text style={styles.subtitle}>
+          Consulta nuestros servicios y reserva al instante.
+        </Text>
+      )}
+      {esAdmin && (
+        <View style={styles.accionesContainer}>
+          <TouchableOpacity
+            style={[styles.accionButton, styles.btnPrincipal]}
+            onPress={() => handleCrear()}
+          >
+            <Text style={styles.accionButtonText}>Crear servicio</Text>
+          </TouchableOpacity>
+        </View>
+      )}
 
       {!!error && <Text style={styles.error}>{error}</Text>}
       {cargando && <Text style={styles.message}>Cargando servicios...</Text>}
@@ -119,30 +111,17 @@ export default function TabTwoScreen() {
         keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => (
           <View style={styles.containerHorizontal}>
-            <View style={styles.servicio}>
-              <Text style={styles.servicioText}>{item.nombre}</Text>
-              <Text style={styles.servicioDetailText}>{item.descripcion}</Text>
-              <Text style={styles.servicioDetailText}>
-                {item.duracion} minutos - ${item.precio}
-              </Text>
-            </View>
-            {esAdmin && (
-              <View style={styles.accionesContainer}>
-                <TouchableOpacity
-                  style={[styles.accionButton, styles.btnEditar]}
-                  onPress={() => handleEditar(item)}
-                >
-                  <Text style={styles.accionButtonText}>Editar</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  style={[styles.accionButton, styles.btnEliminar]}
-                  onPress={() => handleEliminar(item.id)}
-                >
-                  <Text style={styles.accionButtonText}>Eliminar</Text>
-                </TouchableOpacity>
+            <TouchableOpacity onPress={() => handleVerDetalle(item)}>
+              <View style={styles.servicio}>
+                <Text style={styles.servicioText}>{item.nombre}</Text>
+                <Text style={styles.servicioDetailText}>
+                  {item.descripcion}
+                </Text>
+                <Text style={styles.servicioDetailText}>
+                  {item.duracion} minutos - ${item.precio}
+                </Text>
               </View>
-            )}
+            </TouchableOpacity>
           </View>
         )}
       />
@@ -165,6 +144,12 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     marginBottom: 24,
     color: Colors.light.principal,
+  },
+  subtitle: {
+    color: "#667085",
+    fontSize: 15,
+    lineHeight: 22,
+    marginBottom: 28,
   },
   logo: {
     width: 80,
@@ -213,7 +198,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 4,
     marginBottom: 35,
   },
-  btnEditar: {
+  btnPrincipal: {
     backgroundColor: Colors.light.principal,
   },
   btnEliminar: {

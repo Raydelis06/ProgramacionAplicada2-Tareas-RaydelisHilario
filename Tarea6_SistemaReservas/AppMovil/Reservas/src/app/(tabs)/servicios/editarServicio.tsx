@@ -1,6 +1,6 @@
 import { Colors } from "@/constants/theme";
-import { useRouter } from "expo-router";
-import { useState } from "react";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import React, { useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -11,14 +11,27 @@ import {
   TextInput,
   TouchableOpacity,
 } from "react-native";
-import { crearServicio } from "../../services/servicios";
+import { actualizarServicio } from "../../../services/servicios";
 
 export default function CrearServicioScreen() {
   const router = useRouter();
-  const [nombre, setNombre] = useState("");
-  const [descripcion, setDescripcion] = useState("");
-  const [precio, setPrecio] = useState("");
-  const [duracion, setDuracion] = useState("");
+  const {
+    servicioId,
+    nombre: nombreInicial,
+    descripcion: descripcionInicial,
+    precio: precioInicial,
+    duracion: duracionInicial,
+  } = useLocalSearchParams<{
+    servicioId?: string;
+    nombre?: string;
+    descripcion?: string;
+    precio?: string;
+    duracion?: string;
+  }>();
+  const [nombre, setNombre] = useState(nombreInicial ?? "");
+  const [descripcion, setDescripcion] = useState(descripcionInicial ?? "");
+  const [precio, setPrecio] = useState(precioInicial ?? "");
+  const [duracion, setDuracion] = useState(duracionInicial ?? "");
   const [guardando, setGuardando] = useState(false);
 
   const guardarServicio = async () => {
@@ -40,21 +53,34 @@ export default function CrearServicioScreen() {
 
     try {
       setGuardando(true);
-      await crearServicio(
+      const idNumerico = Number(servicioId);
+      if (!Number.isInteger(idNumerico) || idNumerico <= 0) {
+        Alert.alert("Servicio inválido", "No se pudo identificar el servicio.");
+        return;
+      }
+      await actualizarServicio(
+        idNumerico,
         nombre.trim(),
         descripcion.trim(),
         duracionNumerica,
         precioNumerico,
       );
-      Alert.alert("Servicio creado", "El servicio se guardó correctamente.", [
-        { text: "Aceptar", onPress: () => router.replace("/(tabs)/home") },
-      ]);
+      Alert.alert(
+        "Servicio actualizado",
+        "Los cambios se guardaron correctamente.",
+        [
+          {
+            text: "Aceptar",
+            onPress: () => router.replace("/(tabs)/servicios/home"),
+          },
+        ],
+      );
     } catch (error) {
       Alert.alert(
         "Error",
         error instanceof Error
           ? error.message
-          : "No se pudo crear el servicio.",
+          : "No se pudo actualizar el servicio.",
       );
     } finally {
       setGuardando(false);
@@ -64,11 +90,13 @@ export default function CrearServicioScreen() {
   return (
     <ScrollView style={styles.container}>
       <Image
-        source={require("../../../assets/images/logo_sublime.png")}
+        source={require("../../../../assets/images/logo_sublime.png")}
         style={styles.logo}
       />
-      <Text style={styles.title}>Crear servicio</Text>
-      <Text style={styles.subtitle}>Completa la información del servicio.</Text>
+      <Text style={styles.title}>Editar servicio</Text>
+      <Text style={styles.subtitle}>
+        Actualiza la información del servicio.
+      </Text>
       <Text style={styles.label}>Nombre</Text>
       <TextInput
         style={styles.input}
@@ -120,7 +148,7 @@ export default function CrearServicioScreen() {
         {guardando ? (
           <ActivityIndicator color="#fff" />
         ) : (
-          <Text style={styles.buttonText}>Guardar servicio</Text>
+          <Text style={styles.buttonText}>Actualizar servicio</Text>
         )}
       </TouchableOpacity>
       <Text></Text>

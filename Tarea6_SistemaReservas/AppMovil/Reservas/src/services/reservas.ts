@@ -26,6 +26,16 @@ function esValido(item: unknown): item is Record<string, unknown> {
   return typeof item === "object" && item !== null;
 }
 
+export const formatearHora = (hora: string): string => {
+  const match = /(\d{1,2}):(\d{2})/.exec(hora);
+  if (!match) return hora;
+  const h = Number(match[1]);
+  const m = match[2];
+  const periodo = h >= 12 ? "PM" : "AM";
+  const hora12 = h % 12 || 12;
+  return `${hora12}:${m} ${periodo}`;
+};
+
 export const combinarFechaHora = (fecha: Date, hora: Date): Date => {
   const resultado = new Date(fecha);
   resultado.setHours(hora.getHours(), hora.getMinutes(), 0, 0);

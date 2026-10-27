@@ -14,6 +14,7 @@ import { Colors } from "@/constants/theme";
 import {
   actualizarEstadoReserva,
   cancelarReserva,
+  formatearHora,
   obtenerMisReservas,
   obtenerTodasLasReservas,
   type Reserva,
@@ -160,8 +161,10 @@ export default function ListaReservasScreen() {
                 {item.servicio?.nombre || "Servicio"}
               </Text>
               <Text style={styles.servicioDetailText}>
-                Fecha: {new Date(item.fecha).toLocaleDateString()} - Hora:{" "}
-                {item.hora}
+                Fecha: {new Date(item.fecha).toLocaleDateString()}
+              </Text>
+              <Text style={styles.servicioDetailText}>
+                Hora: {formatearHora(item.hora)}
               </Text>
               <Text style={styles.servicioDetailText}>
                 Estado: <Text style={styles.estadoText}>{item.estado}</Text>

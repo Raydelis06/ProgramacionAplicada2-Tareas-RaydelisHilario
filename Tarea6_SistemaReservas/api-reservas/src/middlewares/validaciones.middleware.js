@@ -43,3 +43,18 @@ export const validarCamposReserva = async (req,res,next) => {
     }
     next();
 }
+
+export const validarPerfil = (req, res, next) => {
+    const { nombre } = req.body || {};
+
+    if (typeof nombre !== "string") {
+        return res.status(400).json({ error: "El nombre es obligatorio y debe ser un texto" });
+    }
+
+    if (nombreLimpio.length < 2 || nombreLimpio.length > 100) {
+        return res.status(400).json({
+            error: "El nombre debe tener entre 2 y 100 caracteres"
+        });
+    }
+    next();
+};

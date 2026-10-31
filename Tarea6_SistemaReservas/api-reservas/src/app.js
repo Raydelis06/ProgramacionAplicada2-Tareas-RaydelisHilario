@@ -4,6 +4,7 @@ import { loggerMiddleware } from "./middlewares/logger.middleware.js"
 import authRoutes from "./routes/auth.routes.js"
 import serviciosRoutes from "./routes/servicios.routes.js"
 import reservasRoutes from "./routes/reservas.routes.js"
+import usuariosRoutes from "./routes/usuarios.routes.js"
 
 const app = express()
 
@@ -17,6 +18,8 @@ app.use("/auth", authRoutes)
 app.use("/servicios", serviciosRoutes)
 //Rutas privadas para reservas
 app.use("/reservas", reservasRoutes)
+//Rutas privadas para usuarios
+app.use("/reservas", usuariosRoutes)
 
 app.use((err, req, res, next) => {
   console.error(err.message)

@@ -133,6 +133,7 @@ export async function iniciarSesion(email: string, password: string) {
   if (typeof rol !== "string" || !rol.trim()) {
     throw new Error("El token de inicio de sesión no incluye un rol válido.");
   }
+  await AsyncStorage.setItem("email", email)
   await AsyncStorage.setItem("rol", rol);
 }
 

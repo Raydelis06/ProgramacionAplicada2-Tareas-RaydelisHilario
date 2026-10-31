@@ -53,13 +53,6 @@ export default function AppTabs() {
           renderingMode="template"
         />
       </NativeTabs.Trigger>
-      <NativeTabs.Trigger name="logout">
-        <NativeTabs.Trigger.Label>Salir</NativeTabs.Trigger.Label>
-        <NativeTabs.Trigger.Icon
-          src={require("@/assets/images/tabIcons/logout.png")}
-          renderingMode="template"
-        />
-      </NativeTabs.Trigger>
     </NativeTabs>
   );
 }

@@ -1,6 +1,8 @@
 import { Colors } from "@/constants/theme";
+import { cerrarSesion } from "@/services/auth";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import React from "react";
+import { useFocusEffect, useRouter } from "expo-router";
+import React, { useCallback } from "react";
 import {
   Image,
   Text,
@@ -8,14 +10,43 @@ import {
   StyleSheet,
   TouchableOpacity,
   View,
+  Alert,
 } from "react-native";
 
-export default async function PerfilScreen() {
-    const nombreUsuario = await AsyncStorage.getItem("nombreUsuario");
+export default function PerfilScreen() {
+    const nombreUsuario = AsyncStorage.getItem("nombreUsuario");
     const emailUsuario = AsyncStorage.getItem("emailUsuario");
 
-    function handleCerrarSesion(): void {
-        throw new Error("Function not implemented.");
+    const handleCerrarSesion = () => {
+      const router = useRouter();
+      
+        useFocusEffect(
+          useCallback(() => {
+            Alert.alert(
+              "Cerrar sesión",
+              "¿Seguro que quieres salir?",
+              [
+                {
+                  text: "Cancelar",
+                  style: "cancel",
+                  onPress: () => router.navigate("/servicios/home"), 
+                },
+                {
+                  text: "Salir",
+                  style: "destructive",
+                  onPress: async () => {
+                    await cerrarSesion();
+                    router.replace("/"); 
+                  },
+                },
+              ],
+              {
+                cancelable: true,
+                onDismiss: () => router.navigate("/servicios/home"), 
+              },
+            );
+          }, [router]),
+        );
     }
 
  return(
@@ -26,8 +57,8 @@ export default async function PerfilScreen() {
                 style={styles.logo}
             />
             <Text style={styles.title}>Perfil</Text>
-            <Text style={styles.label}>{nombreUsuario} || {"No identificado"}</Text>
-            <Text style={styles.subtitle}>{emailUsuario} || {"No identificado"}</Text>
+            <Text style={styles.label}>{AsyncStorage.getItem("nombreUsuario")}</Text>
+            <Text style={styles.subtitle}>{AsyncStorage.getItem("email")}</Text>
             {/* editar nombre usuario */}
             <TextInput></TextInput>
             <TouchableOpacity></TouchableOpacity>
@@ -55,7 +86,10 @@ const styles = StyleSheet.create({
   },
   separador: {
     borderTopWidth: 1,
-    borderColor: "gray",
+    borderColor: '#dcdbdb',
+    marginTop: 20,
+    marginBottom: 20
+
   },
   title: {
     color: Colors.light.principal,

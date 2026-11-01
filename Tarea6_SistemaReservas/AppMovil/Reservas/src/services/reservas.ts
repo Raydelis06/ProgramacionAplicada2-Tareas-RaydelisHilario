@@ -1,5 +1,5 @@
 import { Alert } from "react-native";
-import { request } from "./auth";
+import { request } from "./api";
 
 export type Reserva = {
   id: number;

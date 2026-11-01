@@ -1,6 +1,7 @@
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
+  ActivityIndicator,
   Image,
   StyleSheet,
   Text,
@@ -97,7 +98,11 @@ export default function registroScreen() {
         disabled={cargando}
       >
         <Text style={styles.buttonText}>
-          {cargando ? "Registrando..." : "Registrarse"}
+          {cargando ? (
+            <ActivityIndicator color={Colors.light.light_color} />
+          ) : (
+            <Text style={styles.buttonText}>Registrarse</Text>
+          )}
         </Text>
       </TouchableOpacity>
       <TouchableOpacity style={styles.link} onPress={irLogin}>

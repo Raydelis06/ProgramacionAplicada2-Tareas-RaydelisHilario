@@ -1,6 +1,7 @@
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
+  ActivityIndicator,
   Image,
   StyleSheet,
   Text,
@@ -83,7 +84,11 @@ export default function TabOneScreen() {
         disabled={cargando}
       >
         <Text style={styles.buttonText}>
-          {cargando ? "Iniciando sesión..." : "Iniciar sesión"}
+          {cargando ? (
+            <ActivityIndicator color={Colors.light.light_color} />
+          ) : (
+            <Text style={styles.buttonText}>Iniciar sesión</Text>
+          )}
         </Text>
       </TouchableOpacity>
       <TouchableOpacity style={styles.link} onPress={irRegistro}>

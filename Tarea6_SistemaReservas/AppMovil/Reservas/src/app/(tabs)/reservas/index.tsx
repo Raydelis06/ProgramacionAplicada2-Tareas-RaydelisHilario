@@ -21,6 +21,7 @@ import {
 } from "@/services/reservas";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import React from "react";
+import { cancelarRecordatorioReserva } from "@/services/notificaciones";
 
 export default function ListaReservasScreen() {
   const [reservas, setReservas] = useState<Reserva[]>([]);
@@ -95,6 +96,7 @@ export default function ListaReservasScreen() {
           onPress: async () => {
             try {
               await cancelarReserva(id);
+              await cancelarRecordatorioReserva(id);
               await cargarReservas(esAdmin);
               Alert.alert(
                 "Reserva cancelada",

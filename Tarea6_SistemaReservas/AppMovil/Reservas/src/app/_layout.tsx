@@ -2,7 +2,7 @@ import { DarkTheme, DefaultTheme, Stack, ThemeProvider } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
 import "react-native-reanimated";
-
+import { solicitarPermisosNotificaciones } from "@/services/notificaciones";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import React from "react";
 
@@ -15,23 +15,14 @@ export const unstable_settings = {
   // Ensure that reloading on `/modal` keeps a back button present.
   initialRouteName: "index",
 };
-// export async function getEsAdmin(): Promise<boolean> {
-//   try {
-//     const token = await AsyncStorage.getItem("token");
-//     if (!token) return false;
 
-//     const decoded = jwtDecode<{ rol?: string }>(token);
-//     return decoded?.rol === "admin";
-//   } catch (error) {
-//     return false;
-//   }
-// }
 export default function RootLayoutNav() {
   const colorScheme = useColorScheme();
 
   useEffect(() => {
     // Ocultar el splash screen de inmediato una vez que el RootLayout se monta
     SplashScreen.hideAsync();
+    solicitarPermisosNotificaciones().catch(console.error);
   }, []);
   return (
     <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>

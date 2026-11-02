@@ -14,39 +14,34 @@ import {
 } from "react-native";
 
 export default function PerfilScreen() {
+    const router = useRouter();
     const nombreUsuario = AsyncStorage.getItem("nombreUsuario");
     const emailUsuario = AsyncStorage.getItem("emailUsuario");
 
     const handleCerrarSesion = () => {
-      const router = useRouter();
-      
-        useFocusEffect(
-          useCallback(() => {
-            Alert.alert(
-              "Cerrar sesión",
-              "¿Seguro que quieres salir?",
-              [
-                {
-                  text: "Cancelar",
-                  style: "cancel",
-                  onPress: () => router.navigate("/servicios/home"), 
-                },
-                {
-                  text: "Salir",
-                  style: "destructive",
-                  onPress: async () => {
-                    await cerrarSesion();
-                    router.replace("/"); 
-                  },
-                },
-              ],
-              {
-                cancelable: true,
-                onDismiss: () => router.navigate("/servicios/home"), 
-              },
-            );
-          }, [router]),
-        );
+      Alert.alert(
+        "Cerrar sesión",
+        "¿Seguro que quieres salir?",
+        [
+          {
+            text: "Cancelar",
+            style: "cancel",
+            onPress: () => router.navigate("/servicios/home"), 
+          },
+          {
+            text: "Salir",
+            style: "destructive",
+            onPress: async () => {
+              await cerrarSesion();
+              router.replace("/"); 
+            },
+          },
+        ],
+        {
+          cancelable: true,
+          onDismiss: () => router.navigate("/servicios/home"), 
+        },
+      );
     }
 
  return(

@@ -13,5 +13,6 @@ const router = Router()
 
 //rutas para /usuarios
 router.put('/perfil', verificarToken, validarPerfil, actualizarPerfil)
+router.get("/:id", verificarToken, obtenerUsuario);
 
 export default router

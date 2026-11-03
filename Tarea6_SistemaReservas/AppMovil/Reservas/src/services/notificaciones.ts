@@ -57,20 +57,6 @@ export async function solicitarPermisosNotificaciones(): Promise<boolean> {
   const { status } = await requestPermissionsAsync();
   return status === "granted";
 }
-// export async function solicitarPermisosNotificaciones(): Promise<boolean> {
-//   if (Platform.OS === "android") {
-//     await setNotificationChannelAsync(CANAL, {
-//       name: "Recordatorios de reservas",
-//       importance: 4 as never,
-//     });
-//   }
-
-//   const { status: actual } = await getPermissionsAsync();
-//   if (actual === "granted") return true;
-
-//   const { status } = await requestPermissionsAsync();
-//   return status === "granted";
-// }
 
 type DatosRecordatorio = {
   reservaId: number | string;

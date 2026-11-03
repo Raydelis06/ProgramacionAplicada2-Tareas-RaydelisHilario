@@ -1,4 +1,4 @@
-import prisma from "../lib/prisma.js";
+import { prisma } from "../db.js"
 
 export const actualizarPerfil = async (req, res) => {
     try {

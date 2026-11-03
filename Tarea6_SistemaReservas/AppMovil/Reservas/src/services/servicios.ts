@@ -1,4 +1,4 @@
-import { request } from "./auth";
+import { request } from "./api";
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
 

@@ -1,5 +1,5 @@
 import { Alert } from "react-native";
-import { request } from "./auth";
+import { request } from "./api";
 
 export type Reserva = {
   id: number;
@@ -155,19 +155,18 @@ export async function obtenerMisReservas(): Promise<Reserva[]> {
   });
 }
 
-export function crearReserva(data: {
+export async function crearReserva(data: {
   fecha: string;
   hora: string;
   servicioId: number;
   usuarioId: number;
   estado?: string;
-}) {
+}) : Promise<Reserva>{
   const fechaHora = new Date(`${data.fecha}T${data.hora}`);
   if (fechaHora.getTime() <= Date.now()) {
-    Alert.alert("Error", "La fecha y hora deben ser futuras");
-    return;
+    throw new Error("La fecha y hora deben ser futuras");
   } else {
-    return request("/reservas", {
+    const reserva = await request("/reservas", {
       method: "POST",
       body: {
         fecha: data.fecha,
@@ -178,6 +177,7 @@ export function crearReserva(data: {
       },
       authenticated: true,
     });
+    return reserva as Reserva;
   }
 }
 

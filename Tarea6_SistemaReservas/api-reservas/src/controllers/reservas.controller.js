@@ -43,13 +43,21 @@ export const crearReserva = async (req, res) => {
     try {
         const { fecha, hora, servicioId } = req.body || {};
 
+        //Validar que la fecha sea futura
         const fechaReserva = new Date(`${fecha}T00:00:00.000Z`);
-        if (fechaReserva.toISOString().slice(0, 10) !== fecha) {
-            return res.status(400).json({
-                error: "fecha, hora y servicioId son obligatorios y deben tener un formato válido"
-            });
+        const [h, m, s = 0] = hora.split(":").map(Number);
+
+        const fechaHoraReserva = new Date(Date.UTC(
+            fechaReserva.getUTCFullYear(),
+            fechaReserva.getUTCMonth(),
+            fechaReserva.getUTCDate(),
+            h, m, s
+        ));
+        if (fechaHoraReserva <= new Date()) {
+            return res.status(400).json({ error: "La fecha y hora de la reserva deben ser futuras" });
         }
 
+        //Validar que el servicio exista
         const servicio = await prisma.servicio.findUnique({
             where: { id: servicioId }
         });
@@ -57,17 +65,31 @@ export const crearReserva = async (req, res) => {
             return res.status(404).json({ error: "El servicio no existe" });
         }
 
-        const [hours, minutes, seconds = 0] = hora.split(":").map(Number);
+        //Validar que no haya otra reserva del usuario con el mismo horario y servicio
+        const reservaExistente = await prisma.reserva.findFirst({
+            where: {
+                usuarioId: req.usuario.id,
+                servicioId,
+                fecha: fechaReserva,
+                estado: { not: "cancelada" }
+            }
+        });
+        if (reservaExistente) {
+            return res.status(409).json({
+                error: "Ya tienes una reserva activa para este servicio en la misma fecha"
+            });
+        }
+
         const reserva = await prisma.reserva.create({
             data: {
                 fecha: fechaReserva,
-                hora: new Date(Date.UTC(1970, 0, 1, hours, minutes, seconds)),
+                hora: new Date(Date.UTC(1970, 0, 1, h, m, s)),
                 usuarioId: req.usuario.id,
                 servicioId: servicioId
             }
         });
 
-        return res.status(201).json(reserva);
+        return res.status(201).json("Reserva creada con exito!", reserva);
     } catch (error) {
         console.error("Error al crear una reserva: ", error);
         res.status(500).json({ error: "Error interno del servidor al intentar crear la reserva" });

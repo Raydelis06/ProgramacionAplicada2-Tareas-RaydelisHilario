@@ -17,6 +17,7 @@ import {
 } from "react-native";
 import { crearReserva, esFechaHoraFutura } from "../../../services/reservas";
 import { obtenerServicios } from "../../../services/servicios";
+import {programarRecordatorioReserva } from "@/services/notificaciones";
 
 export default function ReservasScreen() {
   const router = useRouter();
@@ -77,13 +78,24 @@ export default function ReservasScreen() {
 
       const idServicioFinal = selectedValue?.id ?? 0;
 
-      await crearReserva({
+      const reserva = await crearReserva({
         fecha: fechaFormateada,
         hora: horaFormateada,
         servicioId: Number(idServicioFinal),
         usuarioId: Number(usuarioId),
         estado: "pendiente",
       });
+      //Programar recordatorio de la reserva creada (notificacion)
+      try {
+        await programarRecordatorioReserva({
+          reservaId: reserva.id,
+          fecha: fechaFormateada,
+          hora: horaFormateada,
+          nombreServicio: selectedValue.nombre,
+        });
+      } catch (notifError) {
+        console.warn("No se pudo programar el recordatorio:", notifError);
+      }
 
       Alert.alert(
         "Reserva creada",
@@ -95,6 +107,7 @@ export default function ReservasScreen() {
           },
         ],
       );
+      
     } catch (error) {
       Alert.alert(
         "Error",
@@ -103,6 +116,7 @@ export default function ReservasScreen() {
     } finally {
       setGuardando(false);
     }
+    
   };
 
   return (

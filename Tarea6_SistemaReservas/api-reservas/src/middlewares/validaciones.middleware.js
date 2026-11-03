@@ -51,7 +51,7 @@ export const validarPerfil = (req, res, next) => {
         return res.status(400).json({ error: "El nombre es obligatorio y debe ser un texto" });
     }
 
-    if (nombreLimpio.length < 2 || nombreLimpio.length > 100) {
+    if (nombre.length < 2 || nombre.length > 100) {
         return res.status(400).json({
             error: "El nombre debe tener entre 2 y 100 caracteres"
         });

@@ -17,7 +17,7 @@ import {
 } from "react-native";
 import { crearReserva, esFechaHoraFutura } from "../../../services/reservas";
 import { obtenerServicios } from "../../../services/servicios";
-import { programarRecordatorioReserva } from "@/services/notificaciones";
+import {programarRecordatorioReserva } from "@/services/notificaciones";
 
 export default function ReservasScreen() {
   const router = useRouter();

@@ -10,6 +10,8 @@ import { setNotificationChannelAsync } from "expo-notifications/build/setNotific
 
 const CLAVE_MAPA = "notificacionesReservas";
 const CANAL = "reservas";
+//Prueba para que la notificacion se muestre 24 horas antes de la reserva (para prueba 1 minuto antes de la reserva)
+//const MS_24_HORAS = 60 * 1000;
 const MS_24_HORAS = 24 * 60 * 60 * 1000;
 
 setNotificationHandler({

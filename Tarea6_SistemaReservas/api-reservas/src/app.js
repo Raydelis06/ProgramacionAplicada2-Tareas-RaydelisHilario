@@ -19,7 +19,7 @@ app.use("/servicios", serviciosRoutes)
 //Rutas privadas para reservas
 app.use("/reservas", reservasRoutes)
 //Rutas privadas para usuarios
-app.use("/reservas", usuariosRoutes)
+app.use("/usuarios", usuariosRoutes)
 
 app.use((err, req, res, next) => {
   console.error(err.message)

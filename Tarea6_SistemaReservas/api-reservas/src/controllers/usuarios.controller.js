@@ -1,3 +1,5 @@
+import prisma from "../lib/prisma.js";
+
 export const actualizarPerfil = async (req, res) => {
     try {
         const { nombre } = req.body;

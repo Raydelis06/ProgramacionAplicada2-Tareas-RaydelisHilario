@@ -1,6 +1,7 @@
 import { Router } from "express";
 import {
-    actualizarPerfil 
+    actualizarPerfil,
+    obtenerUsuario
 } from "../controllers/usuarios.controller.js"
 import {
     validarPerfil
